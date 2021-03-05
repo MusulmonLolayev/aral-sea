@@ -65,7 +65,7 @@ class WellListView(ListAPIView):
         return Well.objects.filter(user = self.request.user)
 
 class MusterPumpingListView(ListAPIView):
-    serializer_class = MusterPumping
+    serializer_class = MusterPumpingSerializer
     permission_classes = [IsAuthenticated]
     def get_queryset(self):
         well_id = int(self.kwargs['well_id'])
@@ -82,7 +82,6 @@ class MusterPumpingListCreateAPIView(ListCreateAPIView):
         return MusterPumping.objects.all()
 
     def post(self, request, *args, **kwargs):
-        print(request.data)
         request.data['instance']['user']=request.user.id 
         serializer = MusterPumping(data=request.data.get('instance'))
         if serializer.is_valid():
@@ -94,7 +93,6 @@ class MusterPumpingListCreateAPIView(ListCreateAPIView):
 @api_view(['POST', 'DELETE', 'PUT'])
 @permission_classes([DjangoModelPermissions])
 def well_request(request):
-    return Response("ssss", status=500)
     try:
         ins_name = 'instance'
         # Create object
