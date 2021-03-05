@@ -72,6 +72,7 @@ export default ({ store, Vue, router }) => {
       function (error) {
         Loading.hide()
         Is_Any_Error = true
+        let data = error.response.data
 
         // see https://en.wikipedia.org/wiki/List_of_HTTP_status_codes
         switch (error.response.status) {
