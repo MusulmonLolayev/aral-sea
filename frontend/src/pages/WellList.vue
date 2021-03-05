@@ -86,19 +86,19 @@
                 <td>
                   <strong>{{ $t("built_year") }}:</strong>
                 </td>
-                <td>&ensp;&ensp;{{ props.row.built_year }}</td>
+                <td>&ensp;&ensp;{{ props.row.built_year }} {{$t("year")}}</td>
               </tr>
               <tr>
                 <td>
                   <strong>{{ $t("depth") }}:</strong>
                 </td>
-                <td>&ensp;&ensp;{{ props.row.depth }}</td>
+                <td>&ensp;&ensp;{{ props.row.depth }} {{$t('metr')}}</td>
               </tr>
               <tr>
                 <td>
                   <strong>{{ $t("diameter") }}:</strong>
                 </td>
-                <td>&ensp;&ensp;{{ props.row.diameter }}</td>
+                <td>&ensp;&ensp;{{ props.row.diameter }} {{$t('metr')}}</td>
               </tr>
               <tr>
                 <td>
@@ -114,7 +114,7 @@
                 <td>
                   <strong>{{ $t("area") }}:</strong>
                 </td>
-                <td>&ensp;&ensp;{{ props.row.area }}</td>
+                <td>&ensp;&ensp;{{ props.row.area }} {{$t('hectare')}}</td>
               </tr>
               <tr>
                 <td>
