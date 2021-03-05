@@ -1,6 +1,24 @@
 from django.db import models
 from django.contrib.auth.models import User
 import datetime
+from django.utils import timezone
+
+class Position(models.Model):
+    title = models.CharField(max_length=50)
+
+    def __str__(self):
+        return self.title
+
+class Staff(models.Model):
+    last_name = models.CharField(max_length=30)
+    first_name = models.CharField(max_length=30)
+    middle_name = models.CharField(max_length=30)
+
+    position = models.ForeignKey(Position, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+
+    def __str__(self):
+        return "{} {} {}".format(self.last_name, self.first_name, self.middle_name)
 
 class Country(models.Model):
     name = models.CharField(max_length=30)
@@ -51,13 +69,21 @@ class Well(models.Model):
     def __str__(self):
         return str(self.farm) + ", Number {}".format(self.number)
 
-class Muster(models.Model):
-    depth = models.FloatField(default=0)
-    degree_salt = models.FloatField(default=0)
-
-    well = models.ForeignKey(Well, on_delete = models.CASCADE)
-    user = models.ForeignKey(User, on_delete = models.SET_NULL, null = True)
+class MusterPumping(models.Model):
+    starting_pumping = models.TimeField(default=timezone.now)
+    finishing_pumping = models.TimeField(default=timezone.now)
+    count_gall = models.IntegerField(default=0)
+    size_gall = models.FloatField(default=0)
+    ugv_before_pumping = models.FloatField(default=0)
+    ugv_after_pumping = models.FloatField(default=0)
+    bottom = models.FloatField(default=0)
+    speed_water = models.FloatField(default=0)
+    elevated = models.FloatField(default=0)
+    reduced = models.FloatField(default=0)
     date = models.DateField(default=datetime.date.today)
 
+    well = models.ForeignKey(Well, on_delete = models.CASCADE)
+    staff = models.ForeignKey(Staff, on_delete = models.SET_NULL, null = True)
+
     def __str__(self):
-        return "Number {}: depth={}, degree of salt={}".format(self.well.number, self.depth, self.degree_salt)
+        return "Number {}: depth={}".format(self.well.number, self.depth)

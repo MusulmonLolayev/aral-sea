@@ -37,8 +37,8 @@ class WellSerializer(serializers.ModelSerializer):
     def get_farm_name(self, obj):
         return obj.farm.name
 
-class MusterSerializer(serializers.ModelSerializer):
+class MusterPumpingSerializer(serializers.ModelSerializer):
     
     class Meta:
-        model = Muster
+        model = MusterPumping
         fields = '__all__'
