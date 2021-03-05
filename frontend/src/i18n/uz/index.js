@@ -2,6 +2,20 @@
 // so you can safely delete all default props below
 
 export default {
+
+  //Common names
+  ok: 'ok',
+  cancel: 'bekor qilish',
+  error_in_request: "so'rovda xatolik",
+  error_in_data: "so'rov tarkibida xatolik bor",
+  please_relogin: "iltimos, qayta kiring",
+  not_permission: "ushbu amalni bajarish uchun sizda ruxsat yo'q",
+  error_in_permission: "ruxsatda xatolik",
+  year: '-yil',
+  short_metr: 'm',
+  metr: 'meter',
+  hectare: 'gektar',
+
   failed: 'Amal bajarilmadi',
   success: 'Amal muvaffaqiyatli o\'tdi',
   app_name: 'Oral degizining monitoring tizimi',
@@ -77,6 +91,7 @@ export default {
   passwords_not_compatible: "Parollar bir xil emas",
   no_internet_connection: 'Internet bilan aloqa yo\'q',
   internal_server_error: 'Server xatoligi',
+  error_in_connection: "Bog'lanishda xatolik",
   built_year: 'Qurilgan yili',
   depth: 'Chuqurligi',
   diameter: 'Diametri',
