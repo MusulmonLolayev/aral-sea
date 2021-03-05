@@ -8,7 +8,7 @@
         v-show="$store.state.common.IsRefreshingTokenExpired"
         style="color: red"
       >
-        {{ $t("token_has_expired") }} <br />
+        {{ $t("token_has_expired") }}, &ensp;
         {{ $t("please_relogin") }}
       </span>
       <span v-show="IsNotFilled" style="color: red">
@@ -123,6 +123,6 @@ export default {
   width: 100%;
   max-width: 350px;
   padding: 10px;
-  max-height: 230px;
+  max-height: 250px;
 }
 </style>
