@@ -11,6 +11,9 @@
         <div class="col-5">
           <q-input v-model="muster.date" :label="$t('date')" type="date"/>
         </div>
+        <div class="col-5">
+          <q-input :label="$t('date')" type="time"/>
+        </div>
       </div>
     </div>
   </q-form>

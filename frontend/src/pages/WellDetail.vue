@@ -14,7 +14,7 @@
         dense
       >
         <div style="margin: 10px">
-          <muster-table :well_id="$route.params.id" />
+          <muster-pumping-table :well_id="$route.params.id" />
         </div>
       </q-expansion-item>
     </q-list>
@@ -22,7 +22,7 @@
 </template>
 
 <script>
-import MusterTable from "../components/list/muster-table";
+import MusterPumpingTable from "../components/list/muster-pumping-table";
 export default {
   data() {
     return {
@@ -59,7 +59,7 @@ export default {
     };
   },
 
-  components: { MusterTable },
+  components: { MusterPumpingTable },
 };
 </script>
 

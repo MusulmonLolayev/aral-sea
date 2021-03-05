@@ -134,7 +134,7 @@
         </q-card-section>
         <q-separator />
         <q-card-section class="q-pt-none">
-          <muster :muster="new_muster" ref="refMuster" />
+          <muster-pumping :muster="new_muster" ref="refMuster" />
         </q-card-section>
 
         <q-card-actions align="right" class="text-primary">
@@ -157,7 +157,7 @@
 </template>
 
 <script>
-import Muster from "../components/editors/muster";
+import MusterPumping from "../components/editors/muster-pumping";
 export default {
   name: "PatientList",
   data() {
@@ -268,7 +268,7 @@ export default {
     this.initialize();
   },
   components: {
-    Muster,
+    MusterPumping
   },
 };
 </script>

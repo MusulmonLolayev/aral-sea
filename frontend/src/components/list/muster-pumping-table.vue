@@ -39,7 +39,7 @@
         </q-card-section>
         <q-separator />
         <q-card-section class="q-pt-none">
-          <muster :muster="editedItem" ref="refMuster" />
+          <muster-pumping :muster="editedItem" ref="refMuster" />
         </q-card-section>
 
         <q-card-actions align="right" class="text-primary">
@@ -62,7 +62,7 @@
 </template>
 
 <script>
-import Muster from "../editors/muster";
+import MusterPumping from "../editors/muster-pumping";
 
 export default {
   name: "MusterTable",
@@ -260,7 +260,7 @@ export default {
     },
   },
   components: {
-    Muster,
+    MusterPumping
   },
   mounted: function () {},
 };
