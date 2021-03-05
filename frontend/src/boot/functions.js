@@ -9,6 +9,11 @@ String.prototype.format = function () {
   return formatted;
 };
 
+Date.prototype.addMins = function(m) {     
+  this.setTime(this.getTime() + (m*60*1000));  
+  return this;    
+} 
+
 let helper = {
   lang(name) {
     return i18n.t(name)
