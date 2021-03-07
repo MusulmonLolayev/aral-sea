@@ -12,7 +12,7 @@
       :pagination-label="$helper.get_pagination_label"
     >
       <template v-slot:top>
-        <q-btn icon="add" color="primary" @click="btnNewItem" dense />
+        <q-btn icon="add" color="primary" @click="btnNewItem" dense v-if="permissions['add']"/>
         <q-btn
           icon="edit"
           class="q-ml-sm"
@@ -20,6 +20,7 @@
           :disable="!IsSelectedItem"
           @click="editItem"
           dense
+           v-if="permissions['change']"
         />
         <q-btn
           icon="remove"
@@ -28,6 +29,7 @@
           :disable="!IsSelectedItem"
           @click="deleteItem"
           dense
+           v-if="permissions['delete']"
         />
       </template>
     </q-table>
@@ -75,6 +77,14 @@ export default {
     defaultItem: null,
     selectedItems: [],
     request_url: "/muster_pumping_request",
+    model_name: "musterpumping",
+    app_name: "main",
+    permissions: {
+      view: false,
+      add: false,
+      change: false,
+      delete: false,
+    },
   }),
   props: ["well_id"],
   computed: {
@@ -97,6 +107,12 @@ export default {
   },
   methods: {
     initialize() {
+      this.$axios
+        .get("/user_permissions/" + this.app_name + "/" + this.model_name)
+        .then((response) => {
+          this.permissions = response.data;
+        });
+
       this.headers = [
         {
           label: this.$t("starting_pumping"),
@@ -149,13 +165,13 @@ export default {
       });
     },
     toTemplate(obj) {
-      let res = Object.assign({}, obj)
-      res['well'] = this.well_id
+      let res = Object.assign({}, obj);
+      res["well"] = this.well_id;
       return res;
     },
     toObject(obj) {
-      let res = Object.assign({}, obj)
-      res['well'] = this.well_id
+      let res = Object.assign({}, obj);
+      res["well"] = this.well_id;
       return res;
     },
 
@@ -200,7 +216,7 @@ export default {
               actions: [{ label: this.$t("close"), color: "white" }],
             });
           }
-        })
+        });
     },
     close() {
       this.dialog = false;
@@ -242,25 +258,8 @@ export default {
       this.$helper.DealSavingRespone(response);
     },
     btnNewItem() {
-      this.defaultItem = {
-        well: this.well_id,
-      };
-      var d = new Date();
-
-      this.defaultItem.starting_pumping = d.toTimeString().substring(0, 8);
-      d.addMins(10);
-      this.defaultItem.finishing_pumping = d.toTimeString().substring(0, 8);
-
-      this.defaultItem.count_gall = 0;
-      this.defaultItem.size_gall = 0;
-      this.defaultItem.ugv_before_pumping = 0;
-      this.defaultItem.ugv_after_pumping = 0;
-      this.defaultItem.bottom = 0;
-      this.defaultItem.speed_water = 0;
-      this.defaultItem.elevated = 0;
-      this.defaultItem.reduced = 0;
-      this.defaultItem.date = this.$helper.GetCurrentDate();
-
+      this.defaultItem = Object.assign({}, this.$helper.muster_pumping());
+      this.defaultItem.well = this.well_id;
       this.editedItem = Object.assign({}, this.defaultItem);
       this.dialog = true;
     },
