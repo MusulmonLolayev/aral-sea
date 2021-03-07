@@ -149,3 +149,13 @@ def muster_pumping_request(request):
             return Response('Deleted', status=200)
     except:
         Response(status=500)
+
+@api_view(["GET"])
+def user_permissions(request, app_name, model_name):
+    permissions = {
+        'view': request.user.has_perm(app_name + '.view_' + model_name),
+        'add': request.user.has_perm(app_name + '.add_' + model_name),
+        'change': request.user.has_perm(app_name + '.change_' + model_name),
+        'delete': request.user.has_perm(app_name + '.delete_' + model_name),
+    }
+    return Response(permissions, status=200)
