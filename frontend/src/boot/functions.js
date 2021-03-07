@@ -110,6 +110,7 @@ let helper = {
   muster_pumping() {
     var d = new Date()
     let defaultItem = {
+      id: 0,
       count_gall: 0,
       size_gall: 0,
       ugv_before_pumping: 0,
@@ -128,6 +129,7 @@ let helper = {
 
   well() {
     let defaultItem = {
+      id: 0,
       number: '1',
       x: 0,
       y: 0,
