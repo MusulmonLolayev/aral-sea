@@ -28,8 +28,10 @@ urlpatterns = [
 
     path('farm_request/<id>', FarmListView.as_view()),
     path('well_request/<id>', WellListView.as_view()),
-    path('muster_request/<well_id>', MusterPumpingListView.as_view()),
-    path('muster_request', MusterPumpingListCreateAPIView.as_view()),
+    
+    path('muster_pumping_request/<well_id>', MusterPumpingListView.as_view()),
+    path('muster_pumping_request', muster_pumping_request),
+
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)
