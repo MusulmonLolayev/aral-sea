@@ -3,23 +3,6 @@ from django.contrib.auth.models import User
 import datetime
 from django.utils import timezone
 
-class Position(models.Model):
-    title = models.CharField(max_length=50)
-
-    def __str__(self):
-        return self.title
-
-class Staff(models.Model):
-    last_name = models.CharField(max_length=30)
-    first_name = models.CharField(max_length=30)
-    middle_name = models.CharField(max_length=30)
-
-    position = models.ForeignKey(Position, on_delete=models.CASCADE)
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
-
-    def __str__(self):
-        return "{} {} {}".format(self.last_name, self.first_name, self.middle_name)
-
 class Country(models.Model):
     name = models.CharField(max_length=30)
     
@@ -39,6 +22,24 @@ class District(models.Model):
     
     def __str__(self):
         return self.name
+
+class Position(models.Model):
+    title = models.CharField(max_length=50)
+
+    def __str__(self):
+        return self.title
+
+class Staff(models.Model):
+    last_name = models.CharField(max_length=30)
+    first_name = models.CharField(max_length=30)
+    middle_name = models.CharField(max_length=30)
+
+    position = models.ForeignKey(Position, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True)
+    district = models.ForeignKey(District, on_delete=models.SET_NULL, null=True)
+
+    def __str__(self):
+        return "{} {} {}".format(self.last_name, self.first_name, self.middle_name)
 
 class Farm(models.Model):
     name = models.CharField(max_length=30)
