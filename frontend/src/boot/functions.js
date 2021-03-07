@@ -92,20 +92,39 @@ let helper = {
   DealSavingRespone(response) {
     if (response == true) {
       Notify.create({
-        message: this.$t("edited"),
+        message: this.lang("edited"),
         color: "blue",
         icon: "success",
-        actions: [{ label: this.$t("close"), color: "white" }],
+        actions: [{ label: this.lang("close"), color: "white" }],
       });
     } else {
       Notify.create({
-        message: this.$t("unedited"),
+        message: this.lang("unedited"),
         color: "red",
         icon: "error",
-        actions: [{ label: this.$t("close"), color: "white" }],
+        actions: [{ label: this.lang("close"), color: "white" }],
       });
     }
   },
+
+  muster_pumping() {
+    var d = new Date()
+    let defaultItem = {
+        count_gall : 0,
+        size_gall : 0,
+        ugv_before_pumping : 0,
+        ugv_after_pumping : 0,
+        bottom : 0,
+        speed_water : 0,
+        elevated : 0,
+        reduced : 0,
+        date : helper.GetCurrentDate()
+    }
+    defaultItem.starting_pumping = d.toTimeString().substring(0, 8)
+    d.addMins(10)
+    defaultItem.finishing_pumping = d.toTimeString().substring(0, 8)
+    return defaultItem
+}
 }
 
 export default ({ store, Vue }) => {
