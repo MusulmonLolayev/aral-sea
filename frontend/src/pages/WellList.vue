@@ -16,22 +16,17 @@
     >
       <template v-slot:top-right="props">
         <div class="row">
-          <q-btn
-            round
-            icon="update"
-            style="margin-right: 30px; margin-top: 5px"
-            @click="updateDate"
-          >
-            <q-tooltip content-class="bg-accent">{{
-              $t("update_data")
-            }}</q-tooltip>
-          </q-btn>
-          <q-input
-            dense
-            debounce="300"
-            v-model="filter"
-            :placeholder="$t('search')"
-          >
+          <q-btn-group style="margin-right: 30px; margin-top: 5px" flat>
+            <q-btn icon="add" @click="updateDate" v-if="permissions['add']">
+              <q-tooltip>{{ $t("add_new_item") }}</q-tooltip>
+            </q-btn>
+
+            <q-btn icon="update" @click="updateDate">
+              <q-tooltip>{{ $t("update_data") }}</q-tooltip>
+            </q-btn>
+          </q-btn-group>
+
+          <q-input dense v-model="filter" :placeholder="$t('search')">
             <template v-slot:append>
               <q-icon name="search" />
             </template>
@@ -55,10 +50,32 @@
                 <q-btn color="grey-7" round flat icon="more_vert">
                   <q-menu cover auto-close>
                     <q-list>
-                      <q-item clickable @click="goDetail(props.row)">
+                      <q-item
+                        clickable
+                        @click="goDetail(props.row)"
+                        v-if="permissions['view']"
+                      >
                         <q-item-section>{{ $t("detail") }}</q-item-section>
                       </q-item>
-                      <q-item clickable @click="addMuster(props.row.id)">
+                      <q-item
+                        clickable
+                        @click="goDetail(props.row)"
+                        v-if="permissions['change']"
+                      >
+                        <q-item-section>{{ $t("edit") }}</q-item-section>
+                      </q-item>
+                      <q-item
+                        clickable
+                        @click="goDetail(props.row)"
+                        v-if="permissions['delete']"
+                      >
+                        <q-item-section>{{ $t("delete") }}</q-item-section>
+                      </q-item>
+                      <q-item
+                        clickable
+                        @click="addMuster(props.row.id)"
+                        v-if="has_add_musterpump"
+                      >
                         <q-item-section>{{ $t("add_muster") }}</q-item-section>
                       </q-item>
                     </q-list>
@@ -86,19 +103,19 @@
                 <td>
                   <strong>{{ $t("built_year") }}:</strong>
                 </td>
-                <td>&ensp;&ensp;{{ props.row.built_year }} {{$t("year")}}</td>
+                <td>&ensp;&ensp;{{ props.row.built_year }} {{ $t("year") }}</td>
               </tr>
               <tr>
                 <td>
                   <strong>{{ $t("depth") }}:</strong>
                 </td>
-                <td>&ensp;&ensp;{{ props.row.depth }} {{$t('metr')}}</td>
+                <td>&ensp;&ensp;{{ props.row.depth }} {{ $t("metr") }}</td>
               </tr>
               <tr>
                 <td>
                   <strong>{{ $t("diameter") }}:</strong>
                 </td>
-                <td>&ensp;&ensp;{{ props.row.diameter }} {{$t('metr')}}</td>
+                <td>&ensp;&ensp;{{ props.row.diameter }} {{ $t("metr") }}</td>
               </tr>
               <tr>
                 <td>
@@ -114,7 +131,7 @@
                 <td>
                   <strong>{{ $t("area") }}:</strong>
                 </td>
-                <td>&ensp;&ensp;{{ props.row.area }} {{$t('hectare')}}</td>
+                <td>&ensp;&ensp;{{ props.row.area }} {{ $t("hectare") }}</td>
               </tr>
               <tr>
                 <td>
@@ -134,7 +151,7 @@
         </q-card-section>
         <q-separator />
         <q-card-section class="q-pt-none">
-          <muster-pumping :muster="new_muster" ref="refMuster" />
+          <muster-pumping :muster_pumping="new_muster" ref="refMuster" />
         </q-card-section>
 
         <q-card-actions align="right" class="text-primary">
@@ -166,6 +183,15 @@ export default {
       data: [],
       dialog: false,
       new_muster: {},
+      model_name: "well",
+      app_name: "main",
+      permissions: {
+        view: false,
+        add: false,
+        change: false,
+        delete: false,
+      },
+      has_add_musterpump: false,
     };
   },
 
@@ -187,6 +213,16 @@ export default {
   methods: {
     initialize() {
       this.updateDate();
+      this.$axios
+        .get("/user_permissions/" + this.app_name + "/" + this.model_name)
+        .then((response) => {
+          this.permissions = response.data;
+        });
+      this.$axios
+        .get("/user_permissions/" + this.app_name + "/" + "musterpumping")
+        .then((response) => {
+          this.has_add_musterpump = response.data["add"];
+        });
     },
 
     goDetail(well) {
@@ -225,22 +261,18 @@ export default {
 
       let response = await this.$helper.saveInstance(
         this.new_muster,
-        "/muster_request"
+        "/muster_pumping_request"
       );
       if (response == true) {
         this.close();
       }
-      this.DealSavingRespone(response);
+      this.$helper.DealSavingRespone(response);
     },
-    
-    addMuster(well_id) {
-      this.new_muster = {
-        depth: 0,
-        degree_salt: 0,
 
-        date: this.$helper.GetCurrentDate(),
-        well: well_id,
-      };
+    addMuster(well_id) {
+      this.new_muster = Object.assign({}, this.$helper.muster_pumping());
+
+      this.new_muster.well = well_id;
       this.dialog = true;
     },
     close() {
@@ -251,7 +283,7 @@ export default {
     this.initialize();
   },
   components: {
-    MusterPumping
+    MusterPumping,
   },
 };
 </script>
