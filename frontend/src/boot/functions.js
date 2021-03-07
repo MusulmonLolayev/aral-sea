@@ -1,5 +1,7 @@
 import { Api } from './axios'
 import { i18n } from './i18n'
+import { Notify } from 'quasar'
+import { Dialog } from 'quasar'
 
 String.prototype.format = function () {
   var formatted = this;
@@ -51,70 +53,17 @@ let helper = {
     today = yyyy + '-' + mm + '-' + dd;
     return today
   },
-  check_acceptability: function (name, instance, ranges) {
-    let res = [
-
-    ]
-    let names = Object.keys(instance)
-    for (let i = 0; i < names.length; i++) {
-
-      let val1 = instance[name]
-      let val2 = instance[names[i]]
-      if (val2 && names[i] != name && !isNaN(val2)) {
-        ranges.forEach(item => {
-
-          let f1 = item['feature_name1']
-          let f2 = item['feature_name2']
-
-          if (name == f1 && names[i] == f2 || name == f2 && names[i] == f1) {
-
-            let sub_val1 = item['sub_value1']
-            let sub_val2 = item['sub_value2']
-
-            let r_val = 0
-
-            if (name == f1 && names[i] == f2) {
-              //console.log(1)
-              r_val = val1 / sub_val1 - val2 / sub_val2
-            }
-            else {
-              //console.log(2)
-              r_val = val2 / sub_val1 - val1 / sub_val2
-            }
-
-            //r_val = val1 / sub_val1 - val2 / sub_val2
-            let l_R = item['l_R']
-            let r_R = item['r_R']
-            if (r_val < l_R || r_R < r_val) {
-              res.push({
-                feature_name1: name,
-                feature_name2: names[i],
-                error: this.lang('logical_error_message').format(this.lang(name), val1, this.lang(names[i]), val2)
-              })
-            }
-          }
-        });
-      }
-    }
-    if (res.length > 0)
-      return res
-    return true
-  },
 
   async saveInstance(instance, url) {
     try {
       if (typeof instance.id == "undefined") {
         let response = await Api
-          .post(url, {
-            instance
-          })
+          .post(url, instance)
         instance.id = response.data
         return true
       } else {
         await Api
-          .put(url, {
-            instance
-          })
+          .put(url, instance)
         return true
       }
     }
@@ -125,9 +74,7 @@ let helper = {
 
   async deleteInstance(instance, url) {
     try {
-      await Api.delete(url, {
-        data: { instance }
-      })
+      await Api.delete(url, {data: {'id': instance.id}})
       return true
     }
     catch (e) {
@@ -140,6 +87,24 @@ let helper = {
   },
   get_pagination_label(firstRowIndex, endRowIndex, totalRowsNumber) {
     return firstRowIndex + "-" + endRowIndex + " " + i18n.t("of") + " " + totalRowsNumber;
+  },
+
+  DealSavingRespone(response) {
+    if (response == true) {
+      Notify.create({
+        message: this.$t("edited"),
+        color: "blue",
+        icon: "success",
+        actions: [{ label: this.$t("close"), color: "white" }],
+      });
+    } else {
+      Notify.create({
+        message: this.$t("unedited"),
+        color: "red",
+        icon: "error",
+        actions: [{ label: this.$t("close"), color: "white" }],
+      });
+    }
   },
 }
 
