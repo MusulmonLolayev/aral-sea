@@ -11,10 +11,10 @@ String.prototype.format = function () {
   return formatted;
 };
 
-Date.prototype.addMins = function(m) {     
-  this.setTime(this.getTime() + (m*60*1000));  
-  return this;    
-} 
+Date.prototype.addMins = function (m) {
+  this.setTime(this.getTime() + (m * 60 * 1000));
+  return this;
+}
 
 let helper = {
   lang(name) {
@@ -74,7 +74,7 @@ let helper = {
 
   async deleteInstance(instance, url) {
     try {
-      await Api.delete(url, {data: {'id': instance.id}})
+      await Api.delete(url, { data: { 'id': instance.id } })
       return true
     }
     catch (e) {
@@ -110,21 +110,40 @@ let helper = {
   muster_pumping() {
     var d = new Date()
     let defaultItem = {
-        count_gall : 0,
-        size_gall : 0,
-        ugv_before_pumping : 0,
-        ugv_after_pumping : 0,
-        bottom : 0,
-        speed_water : 0,
-        elevated : 0,
-        reduced : 0,
-        date : helper.GetCurrentDate()
+      count_gall: 0,
+      size_gall: 0,
+      ugv_before_pumping: 0,
+      ugv_after_pumping: 0,
+      bottom: 0,
+      speed_water: 0,
+      elevated: 0,
+      reduced: 0,
+      date: helper.GetCurrentDate()
     }
     defaultItem.starting_pumping = d.toTimeString().substring(0, 8)
     d.addMins(10)
     defaultItem.finishing_pumping = d.toTimeString().substring(0, 8)
     return defaultItem
-}
+  },
+
+  well() {
+    let defaultItem = {
+      number: '1',
+      x: 0,
+      y: 0,
+      built_year: 1980,
+      depth: 0,
+      speed_water: 0,
+      diameter: 0,
+      material: 0,
+      area: 0,
+      label: 0,
+      material: 0,
+      material: 0,
+      material: 0,
+    }
+    return defaultItem
+  }
 }
 
 export default ({ store, Vue }) => {
@@ -132,4 +151,4 @@ export default ({ store, Vue }) => {
     store.$helper = helper
 }
 
-export {helper}
+export { helper }
