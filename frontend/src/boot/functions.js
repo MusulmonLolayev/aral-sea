@@ -137,12 +137,9 @@ let helper = {
       depth: 0,
       speed_water: 0,
       diameter: 0,
-      material: 0,
+      material: true,
       area: 0,
       label: 0,
-      material: 0,
-      material: 0,
-      material: 0,
     }
     return defaultItem
   }
