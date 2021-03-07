@@ -81,6 +81,7 @@ export default {
   fio: 'names',
   number: 'number',
   birthday: 'birthday',
+  search: 'search',
 
   // Common model names
   last_name: 'last name',
@@ -94,10 +95,21 @@ export default {
   metr: 'metr',
   hectare: 'hectare',
   
-  // Models names
+  // Models names: MusterPumping
+  starting_pumping: 'starting pumping',
+  finishing_pumping: 'finishing pumping',
+  count_gall: 'count of galls',
+  size_gall: 'size of gall',
+  ugv_before_pumping: 'ugv before pumping',
+  ugv_after_pumping: 'ugv after pumping',
+  bottom: 'bottom',
+  speed_water: 'speed of water',
+  elevated: 'elevated',
+  reduced: 'reduced',
+
+  // Modles: ??
   my_wells: 'wells',
   wells: 'wells',
-  search: 'search',
   from_date: 'from date',
   built_year: 'built year',
   depth: 'depth',
