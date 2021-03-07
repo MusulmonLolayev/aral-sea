@@ -185,23 +185,6 @@ export default {
   },
 
   methods: {
-    DealSavingRespone(response) {
-      if (response == true) {
-        this.$q.notify({
-          message: this.$t("edited"),
-          color: "blue",
-          icon: "success",
-          actions: [{ label: this.$t("close"), color: "white" }],
-        });
-      } else {
-        this.$q.notify({
-          message: this.$t("unedited"),
-          color: "red",
-          icon: "error",
-          actions: [{ label: this.$t("close"), color: "white" }],
-        });
-      }
-    },
     initialize() {
       this.updateDate();
     },
@@ -210,7 +193,7 @@ export default {
       this.$store.dispatch("well/setCurrentWell", {
         well: well,
       });
-      this.$router.push("detail/" + well.id);
+      this.$router.push("wells/" + well.id);
     },
 
     async updateDate() {
