@@ -18,3 +18,8 @@ export function logout(state){
     localStorage.removeItem("access_token")
     localStorage.removeItem("refresh_token")
 }
+
+export function user_role(state, {user_role}){
+    localStorage.setItem('user_role', user_role)
+    state.user_role = user_role
+}
