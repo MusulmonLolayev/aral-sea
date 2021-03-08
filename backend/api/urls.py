@@ -28,12 +28,15 @@ urlpatterns = [
 
     path('farm_request/<id>', FarmListView.as_view()),
     path('well_request/<id>', WellListView.as_view()),
+    path('well_request', well_request),
 
     path('muster_pumping_request/<well_id>', MusterPumpingListView.as_view()),
     path('muster_pumping_request', muster_pumping_request),
 
 
     path('user_permissions/<app_name>/<model_name>', user_permissions),
+
+    path('user_gourps', user_groups),
 
 ]
 

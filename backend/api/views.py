@@ -51,8 +51,8 @@ class FarmListView(ListAPIView):
         id = int(self.kwargs['id'])
         if id != 0:
             return Farm.objects.filter(pk = id)
-
-        return Farm.objects.all()
+        
+        return Farm.objects.filter(district=self.request.user.staff.district)
         
 class WellListView(ListAPIView):
     serializer_class = WellSerializer
@@ -75,11 +75,10 @@ class MusterPumpingListView(ListAPIView):
 @api_view(['POST', 'DELETE', 'PUT'])
 def well_request(request):
     try:
-        ins_name = 'instance'
         # Create object
         if request.method == 'POST':
-            request.data[ins_name]['user']=request.user.id 
-            serializer = WellSerializer(data=request.data.get(ins_name))
+            request.data['user']=request.user.id 
+            serializer = WellSerializer(data=request.data)
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data.get('id'), status=201)
@@ -88,14 +87,14 @@ def well_request(request):
         
         # find suitable instance
         try:
-            instance = Well.objects.get(id=request.data.get(ins_name).get('id'))
+            instance = Well.objects.get(id=request.data.get('id'))
         except:
             return Response(status=404)
         
         # Update object
         if request.method == 'PUT':
-            request.data[ins_name]['user']=request.user.id 
-            serializer = WellSerializer(instance, data=request.data.get(ins_name))
+            request.data['user']=request.user.id 
+            serializer = WellSerializer(instance, data=request.data)
             if serializer.is_valid():
                 serializer.save()
                 return Response(status=200)
@@ -159,3 +158,10 @@ def user_permissions(request, app_name, model_name):
         'delete': request.user.has_perm(app_name + '.delete_' + model_name),
     }
     return Response(permissions, status=200)
+
+@api_view(["GET"])
+def user_groups(request):
+    groups = []
+    for item in request.user.groups.all():
+        groups.append(item.name)
+    return Response(groups, status=200)
