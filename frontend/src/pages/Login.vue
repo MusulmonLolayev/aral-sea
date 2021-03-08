@@ -101,6 +101,11 @@ export default {
             "Authorization"
           ] = `Bearer ${response.data.access}`;
           this.$router.go(-1);
+          this.$axios.get("/user_role").then((response) => {
+          this.$store.dispatch("auth/user_role", {
+            user_role: response.data,
+          });
+        });
         })
         .catch(() => {
           this.IsError = true;
