@@ -56,7 +56,7 @@ let helper = {
 
   async saveInstance(instance, url) {
     try {
-      if (typeof instance.id == "undefined") {
+      if (instance.id == 0) {
         let response = await Api
           .post(url, instance)
         instance.id = response.data
