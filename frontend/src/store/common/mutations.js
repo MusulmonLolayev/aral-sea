@@ -39,28 +39,28 @@ export function setLangOptions(state) {
         {
             name: "depth",
             align: "left",
-            label: this.lang.t('depth'),
+            label: this.lang.t('depth') + " (m)",
             field: "depth",
             sortable: true,
         },
         {
             name: "diameter",
             align: "left",
-            label: this.lang.t('diameter'),
+            label: this.lang.t('diameter') + " (m)",
             field: "diameter",
             sortable: true,
         },
-        {
+        /*{
             name: "material",
             align: "material",
             label: this.lang.t('material'),
             field: "material",
             sortable: true,
-        },
+        },*/
         {
             name: "area",
             align: "area",
-            label: this.lang.t('area'),
+            label: this.lang.t('area') + " (m)",
             field: "area",
             sortable: true,
         },
@@ -71,13 +71,13 @@ export function setLangOptions(state) {
             field: "label",
             sortable: true,
         },
-        {
+        /*{
             name: "farm",
             align: "farm",
             label: this.lang.t('farm'),
             field: "farm",
             sortable: true,
-        },
+        },*/
     ]
 }
 export function setConnectionStatus(state, { status }) {
