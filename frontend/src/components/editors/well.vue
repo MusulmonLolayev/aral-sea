@@ -46,6 +46,7 @@
           type="number"
           style="margin-right: 30px"
           :rules="[() => required('built_year')]"
+          :suffix="$t('year')"
         />
       </div>
       <div class="col-5">
@@ -55,6 +56,7 @@
           type="number"
           style="margin-right: 30px"
           :rules="[() => required('depth')]"
+          :suffix="$t('meter')"
         />
       </div>
       <div class="col-5">
@@ -64,6 +66,7 @@
           type="number"
           style="margin-right: 30px"
           :rules="[() => required('diameter')]"
+          :suffix="$t('meter')"
         />
       </div>
       <div class="col-5">
@@ -73,6 +76,7 @@
           type="number"
           style="margin-right: 30px"
           :rules="[() => required('area')]"
+          :suffix="$t('hectare')"
         />
       </div>
       <div class="col-5">

@@ -6,6 +6,8 @@ export default {
   // Common names for labels
   ok: 'ok',
   cancel: 'cancel',
+  yes: 'yes',
+  no: 'no',
 
   // Common names for auth
   error_in_request: 'error in request',
@@ -28,15 +30,12 @@ export default {
   actions: 'actions',
   add: 'add',
   edit: 'edit',
-  cancel: 'cancel',
   new_item: 'new item',
   edited: 'data was edited successfully',
   unedited: 'data was not edited successfully',
   selected: 'selected',
   of: 'of',
   editing: 'editing',
-  yes: 'yes',
-  no: 'no',
   nothing_here: 'nothing here',
   go_home: 'go home',
   token_has_expired: 'your token time has expired',
@@ -82,6 +81,7 @@ export default {
   number: 'number',
   birthday: 'birthday',
   search: 'search',
+  delete: "delete",
 
   // Common model names
   last_name: 'last name',
@@ -92,7 +92,7 @@ export default {
 
   // Common measurement names
   short_metr: 'm',
-  metr: 'metr',
+  meter: 'meter',
   hectare: 'hectare',
   
   // Models names: MusterPumping
@@ -107,7 +107,7 @@ export default {
   elevated: 'elevated',
   reduced: 'reduced',
 
-  // Modles: ??
+  // Modles names: Well
   my_wells: 'wells',
   wells: 'wells',
   from_date: 'from date',
@@ -124,4 +124,11 @@ export default {
   degree_salt: "degree of salt",
   not_higher_zero: 'value must be higher than zero',
   add_muster: 'add muster',
+  select_farm: 'select farm',
+
+  // Models names: farms: 
+  farms: "farms",
+
+  // Window actions names: WellList
+  attach_to_technician: "attach to technician",
 }
