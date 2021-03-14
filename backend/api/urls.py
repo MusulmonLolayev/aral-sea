@@ -38,6 +38,8 @@ urlpatterns = [
 
     path('user_gourps', user_groups),
 
+    path('user_role', user_role),
+
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)
