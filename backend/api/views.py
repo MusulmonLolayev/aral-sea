@@ -11,7 +11,16 @@ from rest_framework.permissions import IsAuthenticated, AllowAny, DjangoModelPer
 from main.models import *
 
 from .serializer import *
+
+def get_user_role(request):
+    # roles by groups: texniklar=0, tuman_administratorlari = 1 for just now
+    role_name = request.user.groups.all()[0].name
+    role = 0
+    if role_name == "tuman_administratorlari":
+        role = 1
     
+    return role
+
 class CountryListView(ListAPIView):
     permission_classes = [IsAuthenticated]
     queryset = Country.objects.all()
@@ -60,8 +69,24 @@ class WellListView(ListAPIView):
     def get_queryset(self):
         id = int(self.kwargs['id'])
         if id != 0:
-            return Well.objects.filter(pk = id, user = self.request.user)
-        return Well.objects.filter(user = self.request.user)
+            return Well.objects.filter(pk = id)
+        role = get_user_role(self.request)
+        # Respond all well which are connected to texniklar
+        if role == 0:
+            return Well.objects.filter(user = self.request.user)
+        elif role == 1:
+            farms = Farm.objects.filter(district = self.request.user.staff.district)
+            """wells = []
+            for farm in farms:
+                wells += Well.objects.filter(farm = farm).all()
+            print(Well.objects.all())"""
+
+            query = Well.objects.filter(farm = farms[0])
+            for i in range(1, len(farms)):
+                query = query.union(Well.objects.filter(farm = farms[i]))
+            return query
+    
+        return Well.objects.all()[:10]
 
 class MusterPumpingListView(ListAPIView):
     serializer_class = MusterPumpingSerializer
@@ -165,3 +190,8 @@ def user_groups(request):
     for item in request.user.groups.all():
         groups.append(item.name)
     return Response(groups, status=200)
+
+@api_view(["GET"])
+def user_role(request):
+    role = get_user_role(request)
+    return Response(role, status=200)
