@@ -11,6 +11,18 @@ String.prototype.format = function () {
   return formatted;
 };
 
+// format='Abs', the first letters of each word of the text drive to uppercase
+// format='ABS', the all words of the text drive to uppercase
+// format='abs', the first letters of each word of the text drive to lowercase
+// format='abs', the all words of the text drive to lowercase: not done
+String.prototype.format_letter = function (format='Abs') {
+  var formatted = this;
+  if (format == "Abs"){
+    formatted = formatted.charAt(0).toUpperCase() + formatted.slice(1)
+  }
+  return formatted;
+};
+
 Date.prototype.addMins = function (m) {
   this.setTime(this.getTime() + (m * 60 * 1000));
   return this;
