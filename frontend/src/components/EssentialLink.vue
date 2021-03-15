@@ -16,7 +16,7 @@
           <q-list>
             <q-item clickable to='wells' style="margin-left:20px">
               <q-item-section avatar>
-                <q-icon color="primary"/>
+                <q-icon color="primary" name="donut_large"/>
               </q-item-section>
               <q-item-section>{{$t('my_wells').format_letter()}}</q-item-section>
             </q-item>
