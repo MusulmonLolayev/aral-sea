@@ -1,12 +1,12 @@
 <template>
   <div class="q-pa-md">
     <q-table
-      :title="$t('wells')"
+      :title="$t('wells').format_letter()"
       :data="filtered_items"
       :columns="$store.state.common.WellList_Colunms"
       row-key="id"
       :filter="filter"
-      :no-data-label="$t('nothingtoshow')"
+      :no-data-label="$t('nothingtoshow').format_letter()"
       :rows-per-page-label="$t('rows_per_page_label') + ':'"
       :selected-rows-label="$helper.getSelectedString"
       :pagination-label="$helper.get_pagination_label"
@@ -17,13 +17,13 @@
         <div class="row">
           <q-btn-group style="margin-right: 30px; margin-top: 5px" flat>
             <q-btn icon="add" @click="add_new_well" v-if="permissions['add']">
-              <q-tooltip>{{ $t("new_item") }}</q-tooltip>
+              <q-tooltip>{{ $t("new_item").format_letter() }}</q-tooltip>
             </q-btn>
             <q-btn icon="add" @click="addMuster" v-if="user_role == 0" :disable="well_selected.length != 1">
-              <q-tooltip>{{ $t("new_item") }}</q-tooltip>
+              <q-tooltip>{{ $t("new_item").format_letter() }}</q-tooltip>
             </q-btn>
             <q-btn icon="details" @click="goDetail" v-if="user_role == 0" :disable="well_selected.length != 1">
-              <q-tooltip>{{ $t("go_detail") }}</q-tooltip>
+              <q-tooltip>{{ $t("go_detail").format_letter() }}</q-tooltip>
             </q-btn>
             <q-btn
               icon="edit"
@@ -31,7 +31,7 @@
               v-if="permissions['change']"
               :disable="well_selected.length != 1"
             >
-              <q-tooltip>{{ $t("edit") }}</q-tooltip>
+              <q-tooltip>{{ $t("edit").format_letter() }}</q-tooltip>
             </q-btn>
             <q-btn
               icon="delete"
@@ -39,7 +39,7 @@
               v-if="permissions['delete']"
               :disable="well_selected.length != 1"
             >
-              <q-tooltip>{{ $t("delete") }}</q-tooltip>
+              <q-tooltip>{{ $t("delete").format_letter() }}</q-tooltip>
             </q-btn>
             <q-btn
               icon="group_work"
@@ -47,16 +47,16 @@
               v-if="user_role == 1"
               :disable="well_selected.length <= 0"
             >
-              <q-tooltip>{{ $t("attach_to_technician") }}</q-tooltip>
+              <q-tooltip>{{ $t("attach_to_technician").format_letter() }}</q-tooltip>
             </q-btn>
             <q-btn icon="update" @click="updateDate">
-              <q-tooltip>{{ $t("update_data") }}</q-tooltip>
+              <q-tooltip>{{ $t("update_data").format_letter() }}</q-tooltip>
             </q-btn>
           </q-btn-group>
           <q-select
             v-if="user_role == 2"
             :options="farms"
-            :display-value="$t('farms')"
+            :display-value="$t('farms').format_letter()"
             v-model="selectedFarms"
             option-label="name"
             options-cover
@@ -66,14 +66,14 @@
 
           <q-select
             :options="farms"
-            :label="$t('farms')"
+            :label="$t('farms').format_letter()"
             v-model="selectedFarms"
             option-label="name"
             options-cover
             style="min-width: 150px; margin-right: 20px"
             @input="farmsChanged"
           />
-          <q-input dense v-model="filter" :placeholder="$t('search')">
+          <q-input dense v-model="filter" :placeholder="$t('search').format_letter()">
             <template v-slot:append>
               <q-icon name="search" />
             </template>
@@ -84,7 +84,7 @@
     <q-dialog v-model="dialog">
       <q-card>
         <q-card-section>
-          <span class="headline">{{ formTitle }}</span>
+          <span class="headline">{{ formTitle.format_letter() }}</span>
         </q-card-section>
         <q-separator />
         <q-card-section class="q-pt-none">
@@ -99,7 +99,7 @@
             use-input
             input-debounce="0"
             :options="technician_options"
-            :label="$t('choose_technician')"
+            :label="$t('choose_technician').format_letter()"
             @filter="filterFn"
             style="width: 350px; margin: 20px"
             v-else
@@ -121,13 +121,13 @@
             color="blue darken-1"
             dense
             @click="close"
-            :label="$t('cancel')"
+            :label="$t('cancel').format_letter()"
           />
           <q-btn
             color="blue darken-1"
             dense
             @click="save"
-            :label="dialog_type == 2 ? $t('attach_to_technician') : $t('save')"
+            :label="dialog_type == 2 ? $t('attach_to_technician').format_letter() : $t('save').format_letter()"
           />
         </q-card-actions>
       </q-card>
@@ -254,10 +254,10 @@ export default {
         });
         if (!hasError) {
           this.$q.notify({
-            message: this.$t("fill_all_fields"),
+            message: this.$t("fill_all_fields").format_letter(),
             color: "red",
             icon: "error",
-            actions: [{ label: this.$t("close"), color: "white" }],
+            actions: [{ label: this.$t("close").format_letter(), color: "white" }],
           });
           return;
         }
@@ -279,10 +279,10 @@ export default {
         });
         if (!hasError) {
           this.$q.notify({
-            message: this.$t("fill_all_fields"),
+            message: this.$t("fill_all_fields").format_letter(),
             color: "red",
             icon: "error",
-            actions: [{ label: this.$t("close"), color: "white" }],
+            actions: [{ label: this.$t("close").format_letter(), color: "white" }],
           });
           return;
         }
@@ -303,10 +303,10 @@ export default {
           })
           .then((response) => {
             this.$q.notify({
-              message: this.$t("attached"),
+              message: this.$t("attached").format_letter(),
               color: "blue",
               icon: "success",
-              actions: [{ label: this.$t("close"), color: "white" }],
+              actions: [{ label: this.$t("close").format_letter(), color: "white" }],
             });
             this.well_selected = [];
             this.dialog = false;
@@ -337,8 +337,8 @@ export default {
       let item = this.well_selected[0];
       this.$q
         .dialog({
-          title: this.$t("confirm"),
-          message: this.$t("would_like_delete"),
+          title: this.$t("confirm").format_letter(),
+          message: this.$t("would_like_delete").format_letter(),
           cancel: true,
           persistent: true,
         })
@@ -354,18 +354,18 @@ export default {
 
           if (response == true) {
             this.$q.notify({
-              message: this.$t("deleted"),
+              message: this.$t("deleted").format_letter(),
               color: "blue",
               icon: "success",
-              actions: [{ label: this.$t("close"), color: "white" }],
+              actions: [{ label: this.$t("close").format_letter(), color: "white" }],
             });
             this.well_selected = [];
           } else {
             this.$q.notify({
-              message: this.$t("notdeleted"),
+              message: this.$t("notdeleted").format_letter(),
               color: "red",
               icon: "error",
-              actions: [{ label: this.$t("close"), color: "white" }],
+              actions: [{ label: this.$t("close").format_letter(), color: "white" }],
             });
           }
         });
