@@ -10,6 +10,8 @@ from rest_framework.permissions import IsAuthenticated, AllowAny, DjangoModelPer
 
 from main.models import *
 
+from django.db import transaction
+
 from .serializer import *
 
 def get_user_role(request):
@@ -195,3 +197,26 @@ def user_groups(request):
 def user_role(request):
     role = get_user_role(request)
     return Response(role, status=200)
+
+@api_view(["GET"])
+def get_technicians(request):
+    try:
+        current_staff = Staff.objects.get(user=request.user)
+        technicians = Staff.objects.filter(district=current_staff.district).exclude(id=current_staff.id)
+        return Response(StaffSerializer(technicians, many=True).data, status=200)
+    except:
+        return Response("Not found", status=404)
+
+
+@api_view(["PUT"])
+def attach_well_to_technician(request):
+    wells = request.data['wells']
+    technician = request.data['technician']
+    technician = Staff.objects.get(pk=technician)
+    
+    with transaction.atomic():
+        for well_id in wells:
+            well = Well.objects.get(pk=well_id)
+            well.user = technician.user
+            well.save()
+    return Response(status=200)

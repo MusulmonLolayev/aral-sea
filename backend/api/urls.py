@@ -40,6 +40,10 @@ urlpatterns = [
 
     path('user_role', user_role),
 
+    path('get_technicians', get_technicians),
+
+    path('attach_well_to_technician', attach_well_to_technician),
+
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)
