@@ -131,4 +131,7 @@ export default {
 
   // Window actions names: WellList
   attach_to_technician: "attach to technician",
+  choose_technician: "choose technician",
+  attached: 'attached',
+  go_detail: 'go detail',
 }

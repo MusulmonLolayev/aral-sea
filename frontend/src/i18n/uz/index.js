@@ -131,4 +131,7 @@ export default {
 
   // Window actions names: WellList
   attach_to_technician: "texnika biriktirish",
+  choose_technician: "texnikni tanlang",
+  attached: "bog'landi",
+  go_detail: 'batafsil',
 };
