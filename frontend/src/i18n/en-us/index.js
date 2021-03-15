@@ -91,9 +91,14 @@ export default {
   year: 'year',
 
   // Common measurement names
-  short_metr: 'm',
+  meter_abbr: 'm',
   meter: 'meter',
   hectare: 'hectare',
+  pieces: 'pieces',
+  liter: 'liter',
+  centimeter: 'centimeter',
+  centimeter_abbr: 'cm',
+  liter_second_abbr: 'l/s',
   
   // Models names: MusterPumping
   starting_pumping: 'starting pumping',

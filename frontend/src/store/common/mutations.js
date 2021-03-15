@@ -3,14 +3,14 @@ export function setIsRefreshingTokenExpired(state, { status }) {
 }
 export function setLangOptions(state) {
     state.LangOptions = [
-        { value: 'en-us', label: this.lang.t('lang_en') },
-        { value: 'uz', label: this.lang.t('lang_uz') }
+        { value: 'en-us', label: this.lang.t('lang_en').format_letter() },
+        { value: 'uz', label: this.lang.t('lang_uz').format_letter() }
     ]
     state.WellList_Colunms = [
         {
             name: "number",
             required: true,
-            label: this.lang.t("number"),
+            label: this.lang.t("number").format_letter(),
             align: "left",
             field: "number",
             sortable: true,
@@ -32,21 +32,21 @@ export function setLangOptions(state) {
         {
             name: "built_year",
             align: "left",
-            label: this.lang.t('built_year'),
+            label: this.lang.t('built_year').format_letter(),
             field: "built_year",
             sortable: true,
         },
         {
             name: "depth",
             align: "left",
-            label: this.lang.t('depth') + " (m)",
+            label: this.lang.t('depth').format_letter() + " (m)",
             field: "depth",
             sortable: true,
         },
         {
             name: "diameter",
             align: "left",
-            label: this.lang.t('diameter') + " (m)",
+            label: this.lang.t('diameter').format_letter() + " (m)",
             field: "diameter",
             sortable: true,
         },
@@ -60,14 +60,14 @@ export function setLangOptions(state) {
         {
             name: "area",
             align: "area",
-            label: this.lang.t('area') + " (m)",
+            label: this.lang.t('area').format_letter() + " (m)",
             field: "area",
             sortable: true,
         },
         {
             name: "label",
             align: "label",
-            label: this.lang.t('label'),
+            label: this.lang.t('label').format_letter(),
             field: "label",
             sortable: true,
         },

@@ -2,21 +2,21 @@
   <q-card class="card">
     <q-layout>
       <span v-show="IsError" style="color: red">
-        {{ $t("username_or_password_incorrect") }}
+        {{ $t("username_or_password_incorrect").format_letter() }}
       </span>
       <span
         v-show="$store.state.common.IsRefreshingTokenExpired"
         style="color: red"
       >
-        {{ $t("token_has_expired") }}, &ensp;
-        {{ $t("please_relogin") }}
+        {{ $t("token_has_expired").format_letter() }}, &ensp;
+        {{ $t("please_relogin").format_letter() }}
       </span>
       <span v-show="IsNotFilled" style="color: red">
-        {{ $t("fill_all_fields") }}
+        {{ $t("fill_all_fields").format_letter() }}
       </span>
       <q-input
         v-model="username"
-        :label="$t('user_or_email')"
+        :label="$t('user_or_email').format_letter()"
         style="margin: 5px"
         @keydown.enter.prevent="login"
       >
@@ -27,7 +27,7 @@
       <q-input
         v-model="password"
         :type="isPwd ? 'password' : 'text'"
-        :label="$t('password')"
+        :label="$t('password').format_letter()"
         style="margin: 5px"
         @keydown.enter.prevent="login"
       >
@@ -49,7 +49,7 @@
         @click="login()"
         :disabled="IsDisabled"
       >
-        {{ $t("login") }}
+        {{ $t("login").format_letter() }}
       </q-btn>
 
       <q-btn
@@ -57,7 +57,7 @@
         class="full-width"
         to="register"
       >
-        {{ $t("register") }}
+        {{ $t("register").format_letter() }}
       </q-btn>
     </q-layout>
   </q-card>

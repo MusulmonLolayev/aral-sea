@@ -6,7 +6,7 @@
       </div>
 
       <div class="text-h2" style="opacity:.4">
-        {{this.$t('nothing_here')}}
+        {{this.$t('nothing_here').format_letter()}}
       </div>
 
       <q-btn
@@ -15,7 +15,7 @@
         text-color="blue"
         unelevated
         to="/"
-        :label="$t('go_home')"
+        :label="$t('go_home').format_letter()"
         no-caps
       />
     </div>

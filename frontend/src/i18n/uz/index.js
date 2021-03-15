@@ -91,9 +91,14 @@ export default {
   year: 'yil',
 
   // Common measurement names
-  short_metr: 'm',
+  meter_abbr: 'm',
   meter: 'metr',
   hectare: 'gektar',
+  pieces: 'marta',
+  liter: 'litr',
+  centimeter: 'santimetr',
+  centimeter_abbr: 'sm',
+  liter_second_abbr: 'l/s',
 
   // Models names: MusterPumping
   starting_pumping: "tortishni boshlash",

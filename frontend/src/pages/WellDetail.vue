@@ -10,7 +10,7 @@
         expand-separator
         default-opened
         icon="live_help"
-        :label="$t('musters')"
+        :label="$t('musters').format_letter()"
         dense
       >
         <div style="margin: 10px">

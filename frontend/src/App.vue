@@ -15,7 +15,7 @@ export default {
   },
   methods: {
     initialize(){
-      this.title = this.$t('app_name')
+      this.title = this.$t('app_name').format_letter()
     },
     onStartAjaxBar () {
       console.log('started')
@@ -29,7 +29,7 @@ export default {
 
   meta() {
     return {
-      title: this.$t('app_name'),
+      title: this.$t('app_name').format_letter(),
     };
   },
   mounted: function(){

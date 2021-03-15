@@ -11,14 +11,14 @@
           @click="leftDrawerOpen = !leftDrawerOpen"
         />
         <q-toolbar-title>
-          {{ $t("app_name") }}
+          {{ $t("app_name").format_letter() }}
         </q-toolbar-title>
 
         <div
           style="float: right; margin-right: 20px"
           v-if="!$store.state.auth.IsLoggined"
         >
-          <q-btn flat dense borderless :label="$t('login')" to="login" />
+          <q-btn flat dense borderless :label="$t('login').format_letter()" to="login" />
         </div>
 
         <div style="float: right">

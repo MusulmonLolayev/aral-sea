@@ -4,14 +4,14 @@
       <div class="col-5">
         <q-input
           v-model="well.number"
-          :label="$t('number')"
+          :label="$t('number').format_letter()"
           style="margin-right: 30px"
         />
       </div>
 
       <div class="col-5">
         <q-select
-          :label="$t('select_farm')"
+          :label="$t('select_farm').format_letter()"
           :options="farms"
           option-value="id"
           option-label="name"
@@ -42,7 +42,7 @@
       <div class="col-5">
         <q-input
           v-model="well.built_year"
-          :label="$t('built_year')"
+          :label="$t('built_year').format_letter()"
           type="number"
           style="margin-right: 30px"
           :rules="[() => required('built_year')]"
@@ -52,7 +52,7 @@
       <div class="col-5">
         <q-input
           v-model="well.depth"
-          :label="$t('depth')"
+          :label="$t('depth').format_letter()"
           type="number"
           style="margin-right: 30px"
           :rules="[() => required('depth')]"
@@ -62,7 +62,7 @@
       <div class="col-5">
         <q-input
           v-model="well.diameter"
-          :label="$t('diameter')"
+          :label="$t('diameter').format_letter()"
           type="number"
           style="margin-right: 30px"
           :rules="[() => required('diameter')]"
@@ -72,7 +72,7 @@
       <div class="col-5">
         <q-input
           v-model="well.area"
-          :label="$t('area')"
+          :label="$t('area').format_letter()"
           type="number"
           style="margin-right: 30px"
           :rules="[() => required('area')]"
@@ -82,16 +82,16 @@
       <div class="col-5">
         <q-input
           v-model="well.label"
-          :label="$t('label')"
+          :label="$t('label').format_letter()"
           type="number"
           style="margin-right: 30px"
           :rules="[() => required('label')]"
         />
       </div>
       <div class="col-7">
-        {{ $t("material") }}: &ensp;
-        <q-radio v-model="well.material" :val="true" :label="$t('polythene')" />
-        <q-radio v-model="well.material" :val="false" :label="$t('metal')" />
+        {{ $t("material").format_letter() }}: &ensp;
+        <q-radio v-model="well.material" :val="true" :label="$t('polythene').format_letter()" />
+        <q-radio v-model="well.material" :val="false" :label="$t('metal').format_letter()" />
       </div>
     </div>
   </q-form>
@@ -117,8 +117,8 @@ export default {
     },
     required(name) {
       let value = this.well[name];
-      if (!value) return this.$t("required");
-      if (value < 0) return this.$t("not_higher_zero");
+      if (!value) return this.$t("required").format_letter();
+      if (value < 0) return this.$t("not_higher_zero").format_letter();
       return true;
     },
     hasError() {

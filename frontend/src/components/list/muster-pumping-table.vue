@@ -6,7 +6,7 @@
       dense
       selection="single"
       :selected.sync="selectedItems"
-      :no-data-label="$t('nothingtoshow')"
+      :no-data-label="$t('nothingtoshow').format_letter()"
       :rows-per-page-label="$t('rows_per_page_label') + ':'"
       :selected-rows-label="$helper.getSelectedString"
       :pagination-label="$helper.get_pagination_label"
@@ -49,13 +49,13 @@
             color="blue darken-1"
             dense
             @click="close"
-            :label="$t('cancel')"
+            :label="$t('cancel').format_letter()"
           />
           <q-btn
             color="blue darken-1"
             dense
             @click="save"
-            :label="$t('save')"
+            :label="$t('save').format_letter()"
           />
         </q-card-actions>
       </q-card>
@@ -89,7 +89,7 @@ export default {
   props: ["well_id"],
   computed: {
     formTitle() {
-      return this.editedIndex === -1 ? this.$t("new_item") : this.$t("editing");
+      return this.editedIndex === -1 ? this.$t("new_item").format_letter() : this.$t("editing").format_letter();
     },
     IsSelectedItem() {
       return this.selectedItems.length;
@@ -115,46 +115,46 @@ export default {
 
       this.headers = [
         {
-          label: this.$t("starting_pumping"),
+          label: this.$t("starting_pumping").format_letter(),
           field: "starting_pumping",
         },
         {
-          label: this.$t("finishing_pumping"),
+          label: this.$t("finishing_pumping").format_letter(),
           field: "finishing_pumping",
         },
         {
-          label: this.$t("count_gall"),
+          label: this.$t("count_gall").format_letter(),
           field: "count_gall",
         },
         {
-          label: this.$t("size_gall"),
+          label: this.$t("size_gall").format_letter(),
           field: "size_gall",
         },
         {
-          label: this.$t("ugv_before_pumping"),
+          label: this.$t("ugv_before_pumping").format_letter(),
           field: "ugv_before_pumping",
         },
         {
-          label: this.$t("ugv_after_pumping"),
+          label: this.$t("ugv_after_pumping").format_letter(),
           field: "ugv_after_pumping",
         },
         {
-          label: this.$t("bottom"),
+          label: this.$t("bottom").format_letter(),
           field: "bottom",
         },
         {
-          label: this.$t("speed_water"),
+          label: this.$t("speed_water").format_letter(),
           field: "speed_water",
         },
         {
-          label: this.$t("elevated"),
+          label: this.$t("elevated").format_letter(),
           field: "elevated",
         },
         {
-          label: this.$t("reduced"),
+          label: this.$t("reduced").format_letter(),
           field: "reduced",
         },
-        { label: this.$t("date"), field: "date" },
+        { label: this.$t("date").format_letter(), field: "date" },
       ];
 
       let well_id = this.well_id;
@@ -184,8 +184,8 @@ export default {
     async deleteItem(item) {
       this.$q
         .dialog({
-          title: this.$t("confirm"),
-          message: this.$t("would_like_delete"),
+          title: this.$t("confirm").format_letter(),
+          message: this.$t("would_like_delete").format_letter(),
           cancel: true,
           persistent: true,
         })
@@ -203,17 +203,17 @@ export default {
 
           if (response == true) {
             this.$q.notify({
-              message: this.$t("deleted"),
+              message: this.$t("deleted").format_letter(),
               color: "blue",
               icon: "success",
-              actions: [{ label: this.$t("close"), color: "white" }],
+              actions: [{ label: this.$t("close").format_letter(), color: "white" }],
             });
           } else {
             this.$q.notify({
-              message: this.$t("notdeleted"),
+              message: this.$t("notdeleted").format_letter(),
               color: "red",
               icon: "error",
-              actions: [{ label: this.$t("close"), color: "white" }],
+              actions: [{ label: this.$t("close").format_letter(), color: "white" }],
             });
           }
         });
@@ -232,10 +232,10 @@ export default {
       });
       if (!hasError) {
         this.$q.notify({
-          message: this.$t("fill_all_fields"),
+          message: this.$t("fill_all_fields").format_letter(),
           color: "red",
           icon: "error",
-          actions: [{ label: this.$t("close"), color: "white" }],
+          actions: [{ label: this.$t("close").format_letter(), color: "white" }],
         });
         return;
       }
