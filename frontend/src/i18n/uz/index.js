@@ -81,7 +81,7 @@ export default {
   delete: "o'chirish",
 
   // App names
-  app_name: 'Oral degizining monitoring tizimi',
+  app_name: 'oral degizining monitoring tizimi',
 
   // Common model names
   last_name: 'familiyasi',
