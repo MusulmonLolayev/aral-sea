@@ -12,6 +12,7 @@ export default {
   // Common names for auth
   error_in_request: "so'rovda xatolik",
   error_in_data: "so'rov tarkibida xatolik bor",
+  please_relogin: 'iltimos, qayta kiring',
   error_in_permission: "ruxsatda xatolik",
   not_permission: "ushbu amalni bajarish uchun sizda ruxsat yo'q",
 
