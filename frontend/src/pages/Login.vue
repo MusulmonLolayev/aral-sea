@@ -51,33 +51,25 @@
       >
         {{ $t("login").format_letter() }}
       </q-btn>
-
-      <q-btn
-        flat
-        class="full-width"
-        to="register"
-      >
-        {{ $t("register").format_letter() }}
-      </q-btn>
     </q-layout>
   </q-card>
 </template>
 
 <script>
 export default {
-  data: function () {
+  data: function() {
     return {
       isPwd: true,
       username: "",
       password: "",
       IsError: false,
-      IsNotFilled: false,
+      IsNotFilled: false
     };
   },
   computed: {
     IsDisabled() {
       return !this.username || !this.password;
-    },
+    }
   },
   methods: {
     login() {
@@ -90,28 +82,28 @@ export default {
       this.$axios
         .post("/login", {
           username: this.username,
-          password: this.password,
+          password: this.password
         })
-        .then((response) => {
+        .then(response => {
           this.$store.dispatch("auth/login", {
             access_token: response.data.access,
-            refresh_token: response.data.refresh,
+            refresh_token: response.data.refresh
           });
           this.$axios.defaults.headers.common[
             "Authorization"
           ] = `Bearer ${response.data.access}`;
           this.$router.go(-1);
-          this.$axios.get("/user_role").then((response) => {
-          this.$store.dispatch("auth/user_role", {
-            user_role: response.data,
+          this.$axios.get("/get_permission").then(response => {
+            this.$store.dispatch("auth/user_permissions", {
+              user_permissions: response.data
+            });
           });
-        });
         })
         .catch(() => {
           this.IsError = true;
         });
-    },
-  },
+    }
+  }
 };
 </script>
 
@@ -128,6 +120,6 @@ export default {
   width: 100%;
   max-width: 350px;
   padding: 10px;
-  max-height: 250px;
+  max-height: 210px;
 }
 </style>

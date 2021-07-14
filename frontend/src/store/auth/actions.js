@@ -18,3 +18,7 @@ export function logout(context){
 export function user_role(context, {user_role}) {
     context.commit('user_role', { user_role: user_role })
 }
+
+export function user_permissions(context, {user_permissions}) {
+    context.commit('user_permissions', { user_permissions: user_permissions })
+}

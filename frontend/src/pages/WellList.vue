@@ -10,25 +10,39 @@
       :rows-per-page-label="$t('rows_per_page_label') + ':'"
       :selected-rows-label="$helper.getSelectedString"
       :pagination-label="$helper.get_pagination_label"
-      :selection="user_role == 0 ? 'single' : 'multiple'"
+      :selection="!IsPermission('change_well') ? 'single' : 'multiple'"
       :selected.sync="well_selected"
     >
       <template v-slot:top-right="props">
         <div class="row">
           <q-btn-group style="margin-right: 30px; margin-top: 5px" flat>
-            <q-btn icon="add" @click="add_new_well" v-if="permissions['add']">
+            <q-btn
+              icon="add"
+              @click="add_new_well"
+              v-if="IsPermission('add_well')"
+            >
               <q-tooltip>{{ $t("new_item").format_letter() }}</q-tooltip>
             </q-btn>
-            <q-btn icon="add" @click="addMuster" v-if="user_role == 0" :disable="well_selected.length != 1">
+            <q-btn
+              icon="add"
+              @click="addMuster"
+              v-if="IsPermission('add_musterpumping')"
+              :disable="well_selected.length != 1"
+            >
               <q-tooltip>{{ $t("new_item").format_letter() }}</q-tooltip>
             </q-btn>
-            <q-btn icon="details" @click="goDetail" v-if="user_role == 0" :disable="well_selected.length != 1">
+            <q-btn
+              icon="details"
+              @click="goDetail"
+              v-if="IsPermission('view_well')"
+              :disable="well_selected.length != 1"
+            >
               <q-tooltip>{{ $t("go_detail").format_letter() }}</q-tooltip>
             </q-btn>
             <q-btn
               icon="edit"
               @click="editItem"
-              v-if="permissions['change']"
+              v-if="IsPermission('change_well')"
               :disable="well_selected.length != 1"
             >
               <q-tooltip>{{ $t("edit").format_letter() }}</q-tooltip>
@@ -36,7 +50,7 @@
             <q-btn
               icon="delete"
               @click="deleteItem"
-              v-if="permissions['delete']"
+              v-if="IsPermission('delete_well')"
               :disable="well_selected.length != 1"
             >
               <q-tooltip>{{ $t("delete").format_letter() }}</q-tooltip>
@@ -44,10 +58,12 @@
             <q-btn
               icon="group_work"
               @click="attach_to_technician"
-              v-if="user_role == 1"
+              v-if="IsPermission('change_well')"
               :disable="well_selected.length <= 0"
             >
-              <q-tooltip>{{ $t("attach_to_technician").format_letter() }}</q-tooltip>
+              <q-tooltip>{{
+                $t("attach_to_technician").format_letter()
+              }}</q-tooltip>
             </q-btn>
             <q-btn icon="update" @click="updateDate">
               <q-tooltip>{{ $t("update_data").format_letter() }}</q-tooltip>
@@ -73,7 +89,11 @@
             style="min-width: 150px; margin-right: 20px"
             @input="farmsChanged"
           />
-          <q-input dense v-model="filter" :placeholder="$t('search').format_letter()">
+          <q-input
+            dense
+            v-model="filter"
+            :placeholder="$t('search').format_letter()"
+          >
             <template v-slot:append>
               <q-icon name="search" />
             </template>
@@ -104,7 +124,7 @@
             style="width: 350px; margin: 20px"
             v-else
             :option-label="
-              (item) =>
+              item =>
                 item.last_name + ` ` + item.first_name + ` ` + item.middle_name
             "
           >
@@ -127,7 +147,11 @@
             color="blue darken-1"
             dense
             @click="save"
-            :label="dialog_type == 2 ? $t('attach_to_technician').format_letter() : $t('save').format_letter()"
+            :label="
+              dialog_type == 2
+                ? $t('attach_to_technician').format_letter()
+                : $t('save').format_letter()
+            "
           />
         </q-card-actions>
       </q-card>
@@ -149,12 +173,6 @@ export default {
       new_muster: {},
       model_name: "well",
       app_name: "main",
-      permissions: {
-        view: false,
-        add: false,
-        change: false,
-        delete: false,
-      },
       has_add_musterpump: false,
       // if 0 => edit, or new well, 1 => edit or mew pumpping muster, 2 => choose the techinician for attach well
       dialog_type: 0,
@@ -166,7 +184,7 @@ export default {
       request_url: "well_request",
       technicians: [],
       selected_technician: {},
-      technician_options: [],
+      technician_options: []
     };
   },
 
@@ -177,39 +195,19 @@ export default {
     },
     IsSelectedItem() {
       return this.selectedItems.length;
-    },
+    }
   },
 
   watch: {
     dialog(val) {
       val || this.close();
-    },
+    }
   },
 
   methods: {
     initialize() {
       this.updateDate();
-      this.$axios
-        .get("/user_permissions/" + this.app_name + "/" + this.model_name)
-        .then((response) => {
-          this.permissions = response.data;
-        });
-      this.$axios
-        .get("/user_permissions/" + this.app_name + "/" + "musterpumping")
-        .then((response) => {
-          this.has_add_musterpump = response.data["add"];
-        });
-
-      if (this.user_role == null) {
-        this.$axios.get("/user_role").then((response) => {
-          this.$store.dispatch("auth/user_role", {
-            user_role: response.data,
-          });
-          this.user_role = this.response.data;
-        });
-      }
-
-      this.$axios.get("/farm_request/0").then((response) => {
+      this.$axios.get("/farm_request/0").then(response => {
         this.farms = response.data;
         this.selectedFarms = this.farms[0];
       });
@@ -226,15 +224,15 @@ export default {
     },
 
     goDetail() {
-      let well =this.well_selected[0]
+      let well = this.well_selected[0];
       this.$store.dispatch("well/setCurrentWell", {
-        well: well,
+        well: well
       });
       this.$router.push("wells/" + well.id);
     },
 
     async updateDate() {
-      await this.$axios.get("/well_request/0").then((response) => {
+      await this.$axios.get("/well_request").then(response => {
         this.items = response.data;
         this.farmsChanged(this.selectedFarms);
       });
@@ -249,7 +247,7 @@ export default {
 
     async save() {
       if (this.dialog_type == 0) {
-        let hasError = await this.$refs.refWell.hasError().then((success) => {
+        let hasError = await this.$refs.refWell.hasError().then(success => {
           return success;
         });
         if (!hasError) {
@@ -257,7 +255,9 @@ export default {
             message: this.$t("fill_all_fields").format_letter(),
             color: "red",
             icon: "error",
-            actions: [{ label: this.$t("close").format_letter(), color: "white" }],
+            actions: [
+              { label: this.$t("close").format_letter(), color: "white" }
+            ]
           });
           return;
         }
@@ -274,7 +274,7 @@ export default {
         }
         this.$helper.DealSavingRespone(response);
       } else if (this.dialog_type == 1) {
-        let hasError = await this.$refs.refMuster.hasError().then((success) => {
+        let hasError = await this.$refs.refMuster.hasError().then(success => {
           return success;
         });
         if (!hasError) {
@@ -282,7 +282,9 @@ export default {
             message: this.$t("fill_all_fields").format_letter(),
             color: "red",
             icon: "error",
-            actions: [{ label: this.$t("close").format_letter(), color: "white" }],
+            actions: [
+              { label: this.$t("close").format_letter(), color: "white" }
+            ]
           });
           return;
         }
@@ -299,19 +301,21 @@ export default {
         this.$axios
           .put("attach_well_to_technician", {
             technician: this.selected_technician.id,
-            wells: this.well_selected.map((item) => item.id),
+            wells: this.well_selected.map(item => item.id)
           })
-          .then((response) => {
+          .then(response => {
             this.$q.notify({
               message: this.$t("attached").format_letter(),
               color: "blue",
               icon: "success",
-              actions: [{ label: this.$t("close").format_letter(), color: "white" }],
+              actions: [
+                { label: this.$t("close").format_letter(), color: "white" }
+              ]
             });
             this.well_selected = [];
             this.dialog = false;
           })
-          .catch((error) => {});
+          .catch(error => {});
       }
     },
 
@@ -340,7 +344,7 @@ export default {
           title: this.$t("confirm").format_letter(),
           message: this.$t("would_like_delete").format_letter(),
           cancel: true,
-          persistent: true,
+          persistent: true
         })
         .onOk(async () => {
           const index = this.filtered_items.indexOf(item);
@@ -357,7 +361,9 @@ export default {
               message: this.$t("deleted").format_letter(),
               color: "blue",
               icon: "success",
-              actions: [{ label: this.$t("close").format_letter(), color: "white" }],
+              actions: [
+                { label: this.$t("close").format_letter(), color: "white" }
+              ]
             });
             this.well_selected = [];
           } else {
@@ -365,7 +371,9 @@ export default {
               message: this.$t("notdeleted").format_letter(),
               color: "red",
               icon: "error",
-              actions: [{ label: this.$t("close").format_letter(), color: "white" }],
+              actions: [
+                { label: this.$t("close").format_letter(), color: "white" }
+              ]
             });
           }
         });
@@ -374,13 +382,18 @@ export default {
     attach_to_technician() {
       this.dialog_type = 2;
       this.new_well = Object.assign({}, this.$helper.well());
-
-      this.$axios.get("get_technicians").then((response) => {
-        this.technicians = response.data;
-        this.selected_technician = response.data[0];
+      if (this.technician_options.length == 0) {
+        this.$axios.get("get_technicians").then(response => {
+          this.technicians = response.data;
+          this.selected_technician = response.data[0];
+          this.technician_options = this.technicians;
+          this.dialog = true;
+        });
+      } else {
+        this.selected_technician = this.technician_options[0];
         this.technician_options = this.technicians;
         this.dialog = true;
-      });
+      }
     },
 
     filterFn(val, update) {
@@ -394,23 +407,30 @@ export default {
       update(() => {
         const needle = val.toLowerCase();
         this.technician_options = this.technicians.filter(
-          (v) =>
+          v =>
             (v.last_name + " " + v.first_name + " " + v.middle_name)
               .toLowerCase()
               .indexOf(needle) > -1
         );
       });
     },
+
+    IsPermission(val) {
+      for (let i = 0; i < this.$store.state.auth.user_permissions.length; i++) {
+        let item = this.$store.state.auth.user_permissions[i];
+        if (item == val) return true;
+      }
+      return false;
+    }
   },
   beforeMount() {
     this.initialize();
   },
   components: {
     MusterPumping,
-    Well,
-  },
+    Well
+  }
 };
 </script>
 
-<style scop>
-</style>
+<style scop></style>

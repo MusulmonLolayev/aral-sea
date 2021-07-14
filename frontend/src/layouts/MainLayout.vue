@@ -18,7 +18,7 @@
           style="float: right; margin-right: 20px"
           v-if="!$store.state.auth.IsLoggined"
         >
-          <q-btn flat dense borderless :label="$t('login').format_letter()" to="login" />
+          <q-btn flat dense borderless :label="$t('login').format_letter()" to="/login" />
         </div>
 
         <div style="float: right">

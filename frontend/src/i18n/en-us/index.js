@@ -82,6 +82,9 @@ export default {
   birthday: 'birthday',
   search: 'search',
   delete: "delete",
+  save_and_back: 'save and back',
+  passwordsnotmatched: 'passwords not matched',
+  min_char_6: 'must be more than 6 symbols',
 
   // Common model names
   last_name: 'last name',
@@ -89,6 +92,15 @@ export default {
   middle_name: 'middle name',
   gender: 'sex',
   year: 'year',
+  position: 'position',
+  personal_inf: 'personal information',
+  user_inf: "user information",
+  conf_password: 'conformation password',
+  staff_inf: 'staff information',
+  order_text: "order text",
+  permissions: "permissions",
+  district: "district",
+  min_char_3: "Min 3 symbols",
 
   // Common measurement names
   meter_abbr: 'm',
@@ -99,6 +111,11 @@ export default {
   centimeter: 'centimeter',
   centimeter_abbr: 'cm',
   liter_second_abbr: 'l/s',
+
+  // Common windows lable names
+  error_reason: 'errors are occurred with reasons',
+  user_not_created: 'user not created',
+  user_exists: 'user with name {0} already exists',
   
   // Models names: MusterPumping
   starting_pumping: 'starting pumping',
@@ -134,9 +151,20 @@ export default {
   // Models names: farms: 
   farms: "farms",
 
+  // Ugv
+  ugv_value: "ugv value",
+  ugv: "ugv",
+
+  // Mgv
+  mgv_value: "mgv value",
+  mgv: "mgv",
+
   // Window actions names: WellList
   attach_to_technician: "attach to technician",
   choose_technician: "choose technician",
   attached: 'attached',
   go_detail: 'go detail',
+
+  // Common names
+  staffs: "staffs"
 }

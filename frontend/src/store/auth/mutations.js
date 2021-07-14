@@ -23,3 +23,8 @@ export function user_role(state, {user_role}){
     localStorage.setItem('user_role', user_role)
     state.user_role = user_role
 }
+
+export function user_permissions(state, {user_permissions}){
+    localStorage.setItem('user_permissions', user_permissions)
+    state.user_permissions = user_permissions
+}

@@ -8,20 +8,34 @@ from rest_framework.response import Response
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework.permissions import IsAuthenticated, AllowAny, DjangoModelPermissions
 
+from django.contrib.auth.models import Permission
+
 from main.models import *
 
 from django.db import transaction
 
 from .serializer import *
 
+import traceback
+
 def get_user_role(request):
     # roles by groups: texniklar=0, tuman_administratorlari = 1 for just now
-    role_name = request.user.groups.all()[0].name
+    group = request.user.groups.all()
     role = 0
-    if role_name == "tuman_administratorlari":
-        role = 1
+    if len(group) > 0:
+        role_name = group[0].name
+
+        if role_name == "tuman_administratorlari":
+            role = 1
     
     return role
+
+def get_user_permissions(user):
+    permissions = []
+    for group in Group.objects.filter(user=user):
+        for per in group.permissions.all():
+            permissions.append(per.codename)
+    return permissions
 
 class CountryListView(ListAPIView):
     permission_classes = [IsAuthenticated]
@@ -47,8 +61,16 @@ class DistrictListView(ListAPIView):
         This view should return a list of all the districts
         for the currently region.
         """
-        regionId = self.kwargs['regionId']
-        return District.objects.filter(region_id=regionId)
+        #regionId = self.kwargs['regionId']
+        #reg_districts = District.objects.filter(region_id=regionId)
+        #districts = []
+        user_districts = self.request.user.staff.districts.all()
+        """print(user_districts)
+        for district in reg_districts:
+            print(district in user_districts)
+            if district in user_districts:
+                districts.append(district)"""
+        return user_districts
 
 class FarmListView(ListAPIView):
     serializer_class = FarmSerializer
@@ -62,26 +84,26 @@ class FarmListView(ListAPIView):
         id = int(self.kwargs['id'])
         if id != 0:
             return Farm.objects.filter(pk = id)
-        
-        return Farm.objects.filter(district=self.request.user.staff.district)
+        districts = self.request.user.staff.districts.all()
+        if len(districts) == 0:
+            return Farm.objects.all()
+        q = Farm.objects.filter(district=districts[0])
+        for i in range(1, len(districts)):
+            q += Farm.objects.filter(district=districts[i])
+        return q
         
 class WellListView(ListAPIView):
     serializer_class = WellSerializer
     permission_classes = [DjangoModelPermissions]
     def get_queryset(self):
         id = int(self.kwargs['id'])
-        if id != 0:
-            return Well.objects.filter(pk = id)
+        
         role = get_user_role(self.request)
         # Respond all well which are connected to texniklar
         if role == 0:
             return Well.objects.filter(user = self.request.user)
         elif role == 1:
             farms = Farm.objects.filter(district = self.request.user.staff.district)
-            """wells = []
-            for farm in farms:
-                wells += Well.objects.filter(farm = farm).all()
-            print(Well.objects.all())"""
 
             query = Well.objects.filter(farm = farms[0])
             for i in range(1, len(farms)):
@@ -99,9 +121,29 @@ class MusterPumpingListView(ListAPIView):
             return MusterPumping.objects.filter(well=well_id)
         return MusterPumping.objects.filter()
 
-@api_view(['POST', 'DELETE', 'PUT'])
-def well_request(request):
+@api_view(['POST', 'DELETE', 'PUT', 'GET'])
+def well_request(request, id=0):
     try:
+        if request.method == 'GET':
+            if id != 0:
+                well = Well.objects.get(pk = id)
+                return Response(WellSerializer(well).data, status=200)
+            
+            # if the user is technician, then must send the well which were attached to the user
+            if request.user.has_perm('main.add_musterpumping'):
+                query = Well.objects.filter(user=request.user)
+                return Response(WellSerializer(query, many=True).data, status=200)
+            
+            # if the user is the district controller, then must send the all well in the district
+            if request.user.has_perm('main.add_well'):
+                # the user is the district controller, then the user must have one district, so we get the first one
+                farms = Farm.objects.filter(district = request.user.staff.districts.all()[0])
+                query = Well.objects.filter(farm = farms[0])
+
+                for i in range(1, len(farms)):
+                    query = query.union(Well.objects.filter(farm = farms[i]))
+                return Response(WellSerializer(query, many=True).data, status=200)
+            return Response("Not have permission", status=403)
         # Create object
         if request.method == 'POST':
             request.data['user']=request.user.id 
@@ -131,6 +173,7 @@ def well_request(request):
             instance.delete()
             return Response('Deleted', status=200)
     except:
+        traceback.print_exc()
         Response(status=500)
 
 @api_view(['POST', 'DELETE', 'PUT'])
@@ -202,11 +245,16 @@ def user_role(request):
 def get_technicians(request):
     try:
         current_staff = Staff.objects.get(user=request.user)
-        technicians = Staff.objects.filter(district=current_staff.district).exclude(id=current_staff.id)
+        districts = current_staff.districts.all()
+        if len(districts) > 0:
+            technicians = Staff.objects.filter(districts=districts[0]).exclude(id=current_staff.id)
+            for i in range(1, len(districts)):
+                technicians += Staff.objects.filter(districts=districts[i])
+            technicians = technicians.filter(position__priority__lt = current_staff.position.priority)
         return Response(StaffSerializer(technicians, many=True).data, status=200)
     except:
+        traceback.print_exc()
         return Response("Not found", status=404)
-
 
 @api_view(["PUT"])
 def attach_well_to_technician(request):
@@ -220,3 +268,170 @@ def attach_well_to_technician(request):
             well.user = technician.user
             well.save()
     return Response(status=200)
+
+@api_view(['GET', 'POST'])
+def staff_request(reqeust, id=0):
+    if reqeust.method == 'GET':
+        if id == 0:
+            user_districts = reqeust.user.staff.districts.all()
+            if len(user_districts) != 0:
+                staffs = []
+                for district in user_districts:
+                    for item in Staff.objects.filter(districts=district):
+                        if (not (item in staffs)) and item.position.priority == reqeust.user.staff.position.priority - 1:
+                            staffs.append(item)
+                return Response(StaffSerializer(staffs, many=True).data, status=200)
+            else:
+                return Response(StaffSerializer(Staff.objects.all(), many=True).data, status=200)
+        else:
+            staff = Staff.objects.get(pk=id)
+            user = staff.user
+            response = {"staff": StaffSerializer(staff).data, "user": {'id': user.id, 'username': user.username}}
+            return Response(response, status=200)
+
+@api_view(['POST', 'PUT'])
+@transaction.atomic
+def user_request(request):
+    if request.method == 'POST':
+        user = UserSerializer(data=request.data.get('user'))
+        staff = StaffSerializer(data=request.data.get('staff'))
+        if user.is_valid() and staff.is_valid():
+            # add to group by position
+            position = Position.objects.get(pk=request.data.get('staff').get('position'))
+
+            user_data = request.data.get('user')
+            user_instance = User.objects.create_user(username=user_data.get('username'), password=user_data.get('password'))
+            user_instance.groups.add(position.group.id)
+
+            staff.save()
+            staff.instance.user = user_instance
+            staff.save()
+
+            response = {"user": user_instance.id, "staff": staff.instance.id}
+            return Response(response, status=200)
+        else:
+            return Response('Not acceptable', status=406)
+    if request.method == 'PUT':
+        
+        user_instance = User.objects.get(pk=request.data.get('user').get('id'))
+        staff_instance = Staff.objects.get(pk=request.data.get('staff').get('id'))
+
+        user = UserSerializer(data=request.data.get('user'), instance=user_instance)
+        staff = StaffSerializer(data=request.data.get('staff'), instance=staff_instance)
+
+        if user.is_valid() and staff.is_valid():
+            # add to group by position
+            new_position = Position.objects.get(pk=request.data.get('staff').get('position'))
+
+            user_instance.groups.clear()
+            user_instance.groups.add(new_position.group.id)
+
+            staff.save()
+
+            return Response("Ok", status=200)
+        else:
+            return Response('Not acceptable', status=406)
+
+@api_view(['GET'])
+def position_request(reqeust):
+    if reqeust.method == 'GET':
+        return Response(PositionSerializer(Position.objects.filter(priority__lt = reqeust.user.staff.position.priority), many=True).data, status=200)
+
+@api_view(['GET'])
+def group_request(reqeust):
+    if reqeust.method == 'GET':
+        return Response(GroupSerializer(Group.objects.all(), many=True).data, status=200)
+
+@api_view(['GET'])
+def get_permission(request):    
+    permissions = get_user_permissions(request.user)
+    return Response(permissions, status=200)
+
+
+@api_view(['POST', 'DELETE', 'PUT', 'GET'])
+def ugv_request(request, well_id=0):
+    try:
+        if request.method == 'GET':
+            if well_id != 0:
+                well = Well.objects.get(pk = well_id)
+                ugvs = Ugv.objects.filter(well=well)
+                return Response(UgvSerializer(ugvs, many=True).data, status=200)
+            
+            # send all ugvs which the user has
+            ugvs = Ugv.objects.filter(staff=request.user.staff)
+            return Response(UgvSerializer(ugvs, many=True).data, status=200)
+        # Create object
+        if request.method == 'POST':
+            request.data['staff']=request.user.staff.id
+            serializer = UgvSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data.get('id'), status=201)
+            else:
+                return Response(serializer.errors, status=406)
+        
+        # find suitable instance
+        try:
+            instance = Ugv.objects.get(id=request.data.get('id'))
+        except:
+            return Response(status=404)
+        
+        # Update object
+        if request.method == 'PUT':
+            request.data['staff']=request.user.staff.id 
+            serializer = UgvSerializer(instance, data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(status=200)
+            else:
+                return Response(serializer.errors, status=406)
+        else:
+            instance.delete()
+            return Response('Deleted', status=200)
+    except:
+        traceback.print_exc()
+        Response(status=500)
+
+@api_view(['POST', 'DELETE', 'PUT', 'GET'])
+def mgv_request(request, well_id=0):
+    try:
+        if request.method == 'GET':
+            if well_id != 0:
+                well = Well.objects.get(pk = well_id)
+                mgvs = Mgv.objects.filter(well=well)
+                return Response(MgvSerializer(mgvs, many=True).data, status=200)
+            
+            # send all ugvs which the user has
+            mgvs = Mgv.objects.filter(staff=request.user.staff)
+            return Response(UgvSerializer(mgvs, many=True).data, status=200)
+        # Create object
+        if request.method == 'POST':
+            request.data['staff']=request.user.staff.id
+            serializer = MgvSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data.get('id'), status=201)
+            else:
+                return Response(serializer.errors, status=406)
+        
+        # find suitable instance
+        try:
+            instance = Mgv.objects.get(id=request.data.get('id'))
+        except:
+            return Response(status=404)
+        
+        # Update object
+        if request.method == 'PUT':
+            request.data['staff']=request.user.staff.id 
+            serializer = MgvSerializer(instance, data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(status=200)
+            else:
+                return Response(serializer.errors, status=406)
+        else:
+            instance.delete()
+            return Response('Deleted', status=200)
+    except:
+        traceback.print_exc()
+        Response(status=500)        

@@ -4,5 +4,6 @@ export default function () {
     LangOptions: [],
     WellList_Colunms: [],
     IsOnline: window.navigator.onLine ? true : false,
+    StaffList_Colunms: [],
   }
 }

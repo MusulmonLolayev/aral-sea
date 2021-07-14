@@ -17,12 +17,38 @@
           <muster-pumping-table :well_id="$route.params.id" />
         </div>
       </q-expansion-item>
+
+      <q-expansion-item
+        expand-separator
+        default-opened
+        icon="live_help"
+        :label="$t('ugv').format_letter()"
+        dense
+      >
+        <div style="margin: 10px">
+          <ugv-table :well_id="$route.params.id" />
+        </div>
+      </q-expansion-item>
+
+      <q-expansion-item
+        expand-separator
+        default-opened
+        icon="live_help"
+        :label="$t('mgv').format_letter()"
+        dense
+      >
+        <div style="margin: 10px">
+          <mgv-table :well_id="$route.params.id" />
+        </div>
+      </q-expansion-item>
     </q-list>
   </div>
 </template>
 
 <script>
 import MusterPumpingTable from "../components/list/muster-pumping-table";
+import UgvTable from "../components/list/ugv-table";
+import MgvTable from "../components/list/mgv-table";
 export default {
   data() {
     return {
@@ -39,8 +65,8 @@ export default {
       } else {
         this.$axios
           .get("/well_request/" + this.$route.params.id)
-          .then((response) => {
-            this.well = response.data[0];
+          .then(response => {
+            this.well = response.data;
             this.title = this.well.number + " " + this.well.farm_name;
           });
       }
@@ -59,7 +85,7 @@ export default {
     };
   },
 
-  components: { MusterPumpingTable },
+  components: { MusterPumpingTable, UgvTable, MgvTable},
 };
 </script>
 

@@ -27,14 +27,17 @@ urlpatterns = [
     path('districts_by_region/<regionId>', DistrictListView.as_view()),
 
     path('farm_request/<id>', FarmListView.as_view()),
-    path('well_request/<id>', WellListView.as_view()),
+
     path('well_request', well_request),
+    path('well_request/<int:id>', well_request),
 
     path('muster_pumping_request/<well_id>', MusterPumpingListView.as_view()),
     path('muster_pumping_request', muster_pumping_request),
 
 
     path('user_permissions/<app_name>/<model_name>', user_permissions),
+
+    path('get_permission', get_permission),
 
     path('user_gourps', user_groups),
 
@@ -43,6 +46,20 @@ urlpatterns = [
     path('get_technicians', get_technicians),
 
     path('attach_well_to_technician', attach_well_to_technician),
+
+    path('staffs/<int:id>', staff_request),
+
+    path('positions', position_request),
+    
+    path('users', user_request),
+
+    path('groups', group_request),
+
+    path('ugv_request', ugv_request),
+    path('ugv_request/<int:well_id>', ugv_request),
+
+    path('mgv_request', mgv_request),
+    path('mgv_request/<int:well_id>', mgv_request),
 
 ]
 

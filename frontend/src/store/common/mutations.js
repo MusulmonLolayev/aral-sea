@@ -78,6 +78,40 @@ export function setLangOptions(state) {
             field: "farm",
             sortable: true,
         },*/
+    ],
+    state.StaffList_Colunms = [
+        {
+            name: "last_name",
+            required: true,
+            label: this.lang.t("last_name").format_letter(),
+            align: "left",
+            field: "last_name",
+            sortable: true,
+        },
+        {
+            name: "first_name",
+            required: true,
+            label: this.lang.t("first_name").format_letter(),
+            align: "left",
+            field: "first_name",
+            sortable: true,
+        },
+        {
+            name: "middle_name",
+            required: true,
+            label: this.lang.t("middle_name").format_letter(),
+            align: "left",
+            field: "middle_name",
+            sortable: true,
+        },
+        {
+            name: "position_name",
+            required: true,
+            label: this.lang.t("position").format_letter(),
+            align: "left",
+            field: "position_name",
+            sortable: true,
+        },
     ]
 }
 export function setConnectionStatus(state, { status }) {

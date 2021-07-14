@@ -56,7 +56,7 @@ export default {
   lang_uz: "o'zbek",
   data: 'berilganlar',
   user_or_email: 'foydalanuvchi nomi yoki pochta',
-  login: 'login',
+  login: 'kirish',
   username_or_password_incorrect: "foydalanuvchi nomi yoki pochta noto'g'iri",
   finish: 'tugalash',
   continue: 'davom ettirish',
@@ -80,9 +80,12 @@ export default {
   birthday: "tug'ulgan kun",
   search: 'qidirish',
   delete: "o'chirish",
+  save_and_back: 'saqlash va qaytish',
+  passwordsnotmatched: 'parollar mos emas',
+  min_char_6: "6 belgidan ko'p bo'lishi kerak",
 
   // App names
-  app_name: 'oral degizining monitoring tizimi',
+  app_name: 'orol degizining monitoring tizimi',
 
   // Common model names
   last_name: 'familiyasi',
@@ -90,6 +93,15 @@ export default {
   middle_name: 'otasining ismi',
   gender: 'jinsi',
   year: 'yil',
+  position: 'lavozimi',
+  personal_inf: "shaxsiy ma'lumotlari",
+  user_inf: "foydalanuvchi ma'lumotlari",
+  conf_password: "tasdiqlash paroli",
+  staff_inf: "xodim ma'lumotlar",
+  order_text: "buyruq matni",
+  permissions: "huquqlar",
+  district: "tuman",
+  min_char_3: "3 ta belgidan oshiq bo'lishi kerak",
 
   // Common measurement names
   meter_abbr: 'm',
@@ -100,6 +112,11 @@ export default {
   centimeter: 'santimetr',
   centimeter_abbr: 'sm',
   liter_second_abbr: 'l/s',
+
+  // Common windows lable names
+  error_reason: 'xatoliklar sababi',
+  user_not_created: 'foydalanuvchi yaratilmadi',
+  user_exists: '{0} nomli foydalanuvchi mavjud',
 
   // Models names: MusterPumping
   starting_pumping: "tortishni boshlash",
@@ -134,10 +151,21 @@ export default {
 
   // Models names: farms: 
   farms: "xo'jaliklar",
+  
+  // Ugv
+  ugv_value: "ugv qiymati",
+  ugv: "ugv",
+
+  // Mgv
+  mgv_value: "mgv qiymati",
+  mgv: "mgv",
 
   // Window actions names: WellList
   attach_to_technician: "texnika biriktirish",
   choose_technician: "texnikni tanlang",
   attached: "bog'landi",
   go_detail: 'batafsil',
+
+  // Common names
+  staffs: "xodimlar"
 };

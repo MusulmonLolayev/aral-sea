@@ -154,7 +154,17 @@ let helper = {
       label: 0,
     }
     return defaultItem
-  }
+  },
+
+  ugv() {
+    var d = new Date()
+    let defaultItem = {
+      id: 0,
+      degree: 0,
+      date: helper.GetCurrentDate()
+    }
+    return defaultItem
+  },
 }
 
 export default ({ store, Vue }) => {

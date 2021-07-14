@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 import datetime
 from django.utils import timezone
 
@@ -25,6 +25,8 @@ class District(models.Model):
 
 class Position(models.Model):
     title = models.CharField(max_length=50)
+    group = models.OneToOneField(Group, on_delete=models.SET_NULL, null=True)
+    priority = models.IntegerField(default=1)
 
     def __str__(self):
         return self.title
@@ -36,7 +38,8 @@ class Staff(models.Model):
 
     position = models.ForeignKey(Position, on_delete=models.CASCADE)
     user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True)
-    district = models.ForeignKey(District, on_delete=models.SET_NULL, null=True)
+
+    districts = models.ManyToManyField(District)
 
     def __str__(self):
         return "{} {} {}".format(self.last_name, self.first_name, self.middle_name)
@@ -88,3 +91,15 @@ class MusterPumping(models.Model):
 
     def __str__(self):
         return "Number {}: depth={}".format(self.well.number, self.depth)
+
+class Ugv(models.Model):
+    well = models.ForeignKey(Well, on_delete = models.CASCADE)
+    staff = models.ForeignKey(Staff, on_delete = models.SET_NULL, null = True)
+    degree = models.FloatField(default=0)
+    date = models.DateField(default=datetime.date.today)
+
+class Mgv(models.Model):
+    well = models.ForeignKey(Well, on_delete = models.CASCADE)
+    staff = models.ForeignKey(Staff, on_delete = models.SET_NULL, null = True)
+    degree = models.FloatField(default=0)
+    date = models.DateField(default=datetime.date.today)
