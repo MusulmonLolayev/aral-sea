@@ -163,7 +163,7 @@
         :label="$t('cancel')"
         @click="$router.go(-1)"
       ></q-btn>
-      -<q-btn
+      <q-btn
         style="margin-right: 10px"
         :label="$t('save_and_back')"
         @click="onSaveAndBack"
