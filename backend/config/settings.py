@@ -26,7 +26,7 @@ SECRET_KEY = '4i8bd4^t-+e3)svg!o&4(3ut6xeh9+lg1+%sd&kj(h9xnq72b('
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '192.168.1.101']
 
 # **Dont forget to add your client's address to the CORS whitelist. This will make sure the server accepts request from
 # the specified source only

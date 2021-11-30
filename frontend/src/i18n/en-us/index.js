@@ -55,6 +55,7 @@ export default {
   home: 'home',
   lang_en: 'english',
   lang_uz: 'uzbek',
+  lang_ru: 'russian',
   data: 'data',
   user_or_email: 'user name or email',
   login: 'login',
@@ -166,5 +167,28 @@ export default {
   go_detail: 'go detail',
 
   // Common names
-  staffs: "staffs"
+  staffs: "staffs",
+
+  // Muster soil window list names
+  muster_soil: "muster soil",
+  soil_analysis_list: "soil analysis list",
+  contour_no: "contour no.",
+  well_no: "well no.",
+  pit_no: "pit no.",
+  area_size: "area size",
+  salt_degree: "salt degree",
+  crop_type: "crop type",
+  location_x: "location x",
+  location_y: "location y",
+  select_salt_degree: "select salt degree",
+  from_deep: "from",
+  to_deep: "to deep",
+  soil_type: "soil type",
+  select_well: "select well",
+  select_crop_type: "select crop type",
+  soil_deep_from: "soil deep from",
+  soil_deep_to: "soil deep to",
+  select_soil_type: "select soil type",
+  soil_chemical_analysis: "soil chemical analysis",
+  soil_deep_analysis_list: "soil deep analysis list"
 }

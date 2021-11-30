@@ -1,7 +1,6 @@
 import { Api } from './axios'
 import { i18n } from './i18n'
 import { Notify } from 'quasar'
-import { Dialog } from 'quasar'
 
 String.prototype.format = function () {
   var formatted = this;
@@ -17,8 +16,10 @@ String.prototype.format = function () {
 // format='abs', the all words of the text drive to lowercase: not done
 String.prototype.format_letter = function (format='Abs') {
   var formatted = this;
-  if (format == "Abs"){
-    formatted = formatted.charAt(0).toUpperCase() + formatted.slice(1)
+  switch (format){
+    case "abs": formatted = this.toLowerCase(); break;
+    case "Abs": formatted = formatted.charAt(0).toUpperCase() + formatted.slice(1); break;
+    case "ABS": formatted = formatted.toUpperCase(); break;
   }
   return formatted;
 };
@@ -94,6 +95,16 @@ let helper = {
     }
   },
 
+  async get_farm(farm_id){
+    let response = await Api.get("farm_request/" + farm_id)
+    return response.data[0]
+  },
+
+  async get_well(well_id){
+    let response = await Api.get("well_request/" + well_id)
+    return response.data
+  },
+
   getSelectedString(numberOfRows) {
     return numberOfRows + " " + i18n.t("selected");
   },
@@ -156,12 +167,46 @@ let helper = {
     return defaultItem
   },
 
+  muster_soil(){
+    return {
+      id: 0,
+      well: null,
+      contour_no: null,
+      pit_no: null,
+      area_size: null,
+      salt_degree: null,
+      date: helper.GetCurrentDate(),
+      crop_type: null,
+      location_x: null,
+      location_y: null,
+    }
+  },
+
+  soil_deep(){
+    return {
+      id: 0,
+      from_deep: 0,
+      to_deep: 30,
+      soil_type: null,
+    }
+  },
+
   ugv() {
-    var d = new Date()
     let defaultItem = {
       id: 0,
       degree: 0,
       date: helper.GetCurrentDate()
+    }
+    return defaultItem
+  },
+
+  soildeep() {
+    let defaultItem = {
+      id: 0,
+      from_deep: 0,
+      to_deep: 0,
+      soiltype: null,
+      mustersoil: null,
     }
     return defaultItem
   },

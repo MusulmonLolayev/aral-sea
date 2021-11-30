@@ -4,7 +4,8 @@ export function setIsRefreshingTokenExpired(state, { status }) {
 export function setLangOptions(state) {
     state.LangOptions = [
         { value: 'en-us', label: this.lang.t('lang_en').format_letter() },
-        { value: 'uz', label: this.lang.t('lang_uz').format_letter() }
+        { value: 'uz', label: this.lang.t('lang_uz').format_letter() },
+        { value: 'ru', label: this.lang.t('lang_ru').format_letter() }
     ]
     state.WellList_Colunms = [
         {

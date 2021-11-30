@@ -11,6 +11,8 @@ const routes = [
       { path: 'wells/:id', component: () => import('pages/WellDetail.vue') },
       { path: 'staffs', component: () => import('pages/Staff.vue') },
       { path: 'staffs/:id', component: () => import('pages/NewStaff.vue') },
+      { path: 'soil', component: () => import('pages/MusterSoilList.vue') },
+      { path: 'soil/:id', component: () => import('pages/MusterSoilDetail.vue') },
     ]
   },
 

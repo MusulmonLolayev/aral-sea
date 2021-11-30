@@ -1,3 +1,5 @@
+import re
+from django.db.models import query
 from django.shortcuts import render
 
 from rest_framework.generics import ListAPIView, ListCreateAPIView, RetrieveUpdateDestroyAPIView
@@ -270,15 +272,15 @@ def attach_well_to_technician(request):
     return Response(status=200)
 
 @api_view(['GET', 'POST'])
-def staff_request(reqeust, id=0):
-    if reqeust.method == 'GET':
+def staff_request(request, id=0):
+    if request.method == 'GET':
         if id == 0:
-            user_districts = reqeust.user.staff.districts.all()
+            user_districts = request.user.staff.districts.all()
             if len(user_districts) != 0:
                 staffs = []
                 for district in user_districts:
                     for item in Staff.objects.filter(districts=district):
-                        if (not (item in staffs)) and item.position.priority == reqeust.user.staff.position.priority - 1:
+                        if (not (item in staffs)) and item.position.priority == request.user.staff.position.priority - 1:
                             staffs.append(item)
                 return Response(StaffSerializer(staffs, many=True).data, status=200)
             else:
@@ -346,7 +348,6 @@ def group_request(reqeust):
 def get_permission(request):    
     permissions = get_user_permissions(request.user)
     return Response(permissions, status=200)
-
 
 @api_view(['POST', 'DELETE', 'PUT', 'GET'])
 def ugv_request(request, well_id=0):
@@ -435,3 +436,183 @@ def mgv_request(request, well_id=0):
     except:
         traceback.print_exc()
         Response(status=500)        
+
+@api_view(['GET'])
+def ugv_from_weighter(request):
+    return Response("Ok", status=200)
+
+
+@api_view(['GET', 'POST', 'PUT', 'DELETE'])
+def muster_soil_request(request, id=0):
+    try:
+        if request.method == 'GET':
+            if id == 0:
+                if request.user.has_perm('main.add_analysissoil'):
+                    return Response(MusterSoilSerializer(MusterSoil.objects.all(), many=True).data, status=200)
+                else:
+                    return Response(MusterSoilSerializer(MusterSoil.objects.filter(user=request.user), many=True).data, status=200)
+            else:
+                try:
+                    obj = MusterSoil.objects.get(pk=id)
+                    return Response(MusterSoilSerializer(obj).data, status=200)
+                except:
+                    return Response("Not Found", status=404)                    
+        # Create object
+        if request.method == 'POST':
+            request.data['user']=request.user.id
+            serializer = MusterSoilSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                analysis_soil_analysis = AnalysisSoil()
+                analysis_soil_analysis.muster_soil = serializer.instance
+                analysis_soil_analysis.save()
+                return Response(serializer.data.get('id'), status=201)
+            else:
+                return Response(serializer.errors, status=406)
+        
+        # find suitable instance
+        try:
+            instance = MusterSoil.objects.get(id=request.data.get('id'))
+        except:
+            return Response(status=404)
+        
+        # Update object
+        if request.method == 'PUT':
+            request.data['user']=request.user.id 
+            serializer = MusterSoilSerializer(instance, data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(status=200)
+            else:
+                return Response(serializer.errors, status=406)
+        else:
+            instance.delete()
+            return Response('Deleted', status=200)
+    except:
+        traceback.print_exc()
+        Response(status=500)
+
+@api_view(['GET'])
+def farms_by_user_district(request):
+    try:
+        query = []
+        for district in request.user.staff.districts.all():
+            for farm in Farm.objects.filter(district=district):
+                query.append(farm)
+        return Response(FarmSerializer(query, many=True).data, status=200)
+    except:
+        traceback.print_exc()
+        Response(status=500)
+
+@api_view(['GET'])
+def well_by_farm(request, farm_id):
+    try:
+        return Response(WellSerializer(Well.objects.filter(farm=farm_id), many=True).data, status=200)
+    except:
+        traceback.print_exc()
+        Response(status=500)
+
+@api_view(["GET"])
+def salt_degree_request(request):
+    try:
+        return Response(SaltDegreeSerializer(SaltDegree.objects.all(), many=True).data, status=200)
+    except:
+        traceback.print_exc()
+        Response(status=500)
+
+@api_view(["GET", "POST", "PUT", "DELETE"])
+def soil_deep_request(request, mustersoilid=0):
+    try:
+        if request.method == "GET":
+            if mustersoilid != 0:
+                return Response(SoilDeepSerializer(SoilDeep.objects.filter(muster_soil=mustersoilid), many=True).data, status=200)
+            else:
+                Response(status=400)
+        
+        # Create object
+        if request.method == 'POST':
+            serializer = SoilDeepSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data.get('id'), status=201)
+            else:
+                return Response(serializer.errors, status=406)
+
+        # find suitable instance
+        try:
+            instance = SoilDeep.objects.get(id=request.data.get('id'))
+        except:
+            return Response(status=404)
+        
+        # Update object
+        if request.method == 'PUT':
+            serializer = SoilDeepSerializer(instance, data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(status=200)
+            else:
+                return Response(serializer.errors, status=406)
+        else:
+            instance.delete()
+            return Response('Deleted', status=200)
+    except:
+        traceback.print_exc()
+        Response(status=500)
+
+@api_view(["GET"])
+def soil_type_request(request):
+    try:
+        return Response(SoilTypeSerializer(SoilType.objects.all(), many=True).data, status=200)
+    except:
+        traceback.print_exc()
+        Response(status=500)
+
+@api_view(["GET"])
+def crop_type_request(request):
+    try:
+        return Response(CropTypeSerializer(CropType.objects.all(), many=True).data, status=200)
+    except:
+        traceback.print_exc()
+        Response(status=500)
+
+@api_view(["GET", "POST", "PUT", "DELETE"])
+def analysis_soil_request(request, mustersoilid=0):
+    try:
+        if request.method == "GET":
+            if mustersoilid != 0:
+                return Response(AnalysisSoilSerializer(AnalysisSoil.objects.filter(muster_soil=mustersoilid), many=True).data, status=200)
+            else:
+                Response(status=400)
+        
+        # Create object
+        if request.method == 'POST':
+            serializer = AnalysisSoilSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data.get('id'), status=201)
+            else:
+                return Response(serializer.errors, status=406)
+
+        # find suitable instance
+        try:
+            instance = AnalysisSoil.objects.get(id=request.data.get('id'))
+        except:
+            return Response(status=404)
+        
+        
+        # Update object
+        if request.method == 'PUT':
+            request.data['user']=request.user.id
+
+            serializer = AnalysisSoilSerializer(instance, data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(status=200)
+            else:
+                return Response(serializer.errors, status=406)
+        else:
+            instance.delete()
+            return Response('Deleted', status=200)
+    except:
+        traceback.print_exc()
+        Response(status=500)

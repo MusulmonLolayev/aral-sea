@@ -27,6 +27,19 @@
                 $t("my_wells").format_letter()
               }}</q-item-section>
             </q-item>
+            <q-item
+              clickable
+              to="/soil"
+              style="margin-left:20px"
+              v-if="IsPermission('view_mustersoil')"
+            >
+              <q-item-section avatar>
+                <q-icon color="primary" name="donut_large" />
+              </q-item-section>
+              <q-item-section>{{
+                $t("muster_soil").format_letter()
+              }}</q-item-section>
+            </q-item>
             <q-item clickable to="/staffs" style="margin-left:20px" v-if="IsPermission('view_user')">
               <q-item-section avatar>
                 <q-icon color="primary" name="group" />

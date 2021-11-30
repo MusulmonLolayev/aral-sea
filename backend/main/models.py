@@ -49,7 +49,7 @@ class Farm(models.Model):
     district = models.ForeignKey(District, on_delete = models.CASCADE)
     
     def __str__(self):
-        return self.name + " ({})".format(self.district)
+        return self.name# + " ({})".format(self.district)
 
 class Well(models.Model):
     number = models.CharField(max_length=30)
@@ -103,3 +103,49 @@ class Mgv(models.Model):
     staff = models.ForeignKey(Staff, on_delete = models.SET_NULL, null = True)
     degree = models.FloatField(default=0)
     date = models.DateField(default=datetime.date.today)
+
+class SaltDegree(models.Model):
+    name = models.CharField(max_length=30)
+
+    def __str__(self):
+        return self.name
+class CropType(models.Model):
+    name = models.CharField(max_length=30)
+    def __str__(self):
+        return self.name
+
+class MusterSoil(models.Model):
+    well = models.ForeignKey(Well, on_delete = models.CASCADE, null = True)
+    contour_no = models.IntegerField(default=0)
+    pit_no = models.IntegerField(default=0)
+    area_size = models.FloatField(default=0)
+    salt_degree = models.ForeignKey(SaltDegree, on_delete = models.CASCADE)
+    date = models.DateField(default=datetime.date.today)
+    crop_type = models.ForeignKey(CropType, on_delete = models.CASCADE)
+
+    location_x = models.FloatField(default=0)
+    location_y = models.FloatField(default=0)
+
+    user = models.ForeignKey(User, on_delete = models.SET_NULL, null=True)
+
+class SoilType(models.Model):
+    name = models.CharField(max_length=30)
+    def __str__(self):
+        return self.name
+
+class SoilDeep(models.Model):
+    from_deep = models.FloatField(default=0)
+    to_deep = models.FloatField(default=0)
+    soil_type = models.ForeignKey(SoilType, on_delete = models.CASCADE)
+    muster_soil = models.ForeignKey(MusterSoil, on_delete=models.SET_NULL, null=True)
+
+class AnalysisSoil(models.Model):
+    muster_soil = models.OneToOneField(MusterSoil, on_delete=models.SET_NULL, null=True)
+    electric_wire  = models.FloatField(default=0)
+    hco3 = models.FloatField(default=0)
+    cl = models.FloatField(default=0)
+    so4 = models.FloatField(default=0)
+    ca = models.FloatField(default=0)
+    mg = models.FloatField(default=0)
+
+    user = models.ForeignKey(User, on_delete = models.SET_NULL, null=True)

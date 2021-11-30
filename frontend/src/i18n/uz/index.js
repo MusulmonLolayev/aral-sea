@@ -6,8 +6,8 @@ export default {
   // Common names for labels
   ok: 'ok',
   cancel: 'bekor qilish',
-  yes: 'yes',
-  no: 'no',
+  yes: "ha",
+  no: "yo'q",
 
   // Common names for auth
   error_in_request: "so'rovda xatolik",
@@ -54,6 +54,7 @@ export default {
   home: 'bosh sahifa',
   lang_en: 'ingliz',
   lang_uz: "o'zbek",
+  lang_ru: 'ruscha',
   data: 'berilganlar',
   user_or_email: 'foydalanuvchi nomi yoki pochta',
   login: 'kirish',
@@ -167,5 +168,28 @@ export default {
   go_detail: 'batafsil',
 
   // Common names
-  staffs: "xodimlar"
+  staffs: "xodimlar",
+
+   // Muster soil window list names
+   muster_soil: "tuproqni yig'ish",
+   soil_analysis_list: "tuproq tahlillari ro'yxati",
+   contour_no: "kontur raqami",
+   well_no: "quduq raqami",
+   pit_no: "shurf raqami",
+   area_size: "maydon yuzi",
+   salt_degree: "sho'rlanish darajasi",
+   crop_type: "ekin turi",
+   location_x: "joylashuv x",
+   location_y: "joylashuv y",
+   select_salt_degree: "sho'rlanish darajasini tanlang",
+   from_deep: "chuqurlikdan",
+   to_deep: "chuqurliggacha",
+   soil_type: "tuproq turi",
+   select_well: "quduqni tanlang",
+   select_crop_type: "ekin turini tanglang",
+   soil_deep_from: "tuproq chuqurliqdan",
+   soil_deep_to: "tuproq chuqurlikgacha",
+   select_soil_type: "tuproq turini tanlang",
+   soil_chemical_analysis: "tuproqni kimyoviy tahlili",
+   soil_deep_analysis_list: "tuproqning chuqurlik tahlili ro'yxati"
 };

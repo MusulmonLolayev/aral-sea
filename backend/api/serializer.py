@@ -78,3 +78,34 @@ class MgvSerializer(serializers.ModelSerializer):
     class Meta:
         model = Mgv
         fields = '__all__'
+
+class MusterSoilSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MusterSoil
+        fields = '__all__'
+
+
+class SaltDegreeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SaltDegree
+        fields = '__all__'
+
+class SoilDeepSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SoilDeep
+        fields = '__all__'
+
+class SoilTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SoilType
+        fields = '__all__'
+
+class CropTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CropType
+        fields = '__all__'
+
+class AnalysisSoilSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AnalysisSoil
+        fields = '__all__'
