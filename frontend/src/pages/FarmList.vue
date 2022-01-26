@@ -124,7 +124,7 @@ export default {
         { label: this.$t("farm_name").format_letter(), field: row => row.name }
       ];
 
-      await this.$axios.get("district_request").then(response => {
+      await this.$axios.get("get_user_district").then(response => {
         this.districts = response.data;
         this.selected_district = this.districts[0].id;
         this.Update();

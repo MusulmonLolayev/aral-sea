@@ -38,9 +38,10 @@ export default {
   methods: {
     initialize() {
         this.$axios
-        .get("/district_request")
+        .get("/get_user_district")
         .then(response => {
             this.districts = response.data
+            this.farm.district = this.districts[0].id
         })
     },
     hasError() {

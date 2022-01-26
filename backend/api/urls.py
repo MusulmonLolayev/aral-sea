@@ -27,6 +27,7 @@ urlpatterns = [
     path('districts_by_region/<regionId>', DistrictListView.as_view()),
 
     path('district_request', district_request),
+    path('get_user_district', get_user_district),
 
     path('farm_request/<id>', FarmListView.as_view()),
     path('district_farms/<district_id>', farm_request),

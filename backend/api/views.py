@@ -255,6 +255,12 @@ def district_request(request):
     if request.method == "GET":
         return Response(DistrictSerializer(District.objects.all(), many=True).data, status=200)
 
+
+@api_view(['GET'])
+def get_user_district(request):
+    if request.method == "GET":
+        return Response(DistrictSerializer(request.user.staff.districts, many=True).data, status=200)
+
 @api_view(["GET"])
 def user_permissions(request, app_name, model_name):
     permissions = {
@@ -403,7 +409,7 @@ def group_request(reqeust):
 def get_user_information(request):
     permissions = get_user_permissions(request.user)
     staff = request.user.staff
-    title = f"{staff.last_name} {staff.first_name[0]}. {staff.first_name[0] + '.' if len(staff.first_name) else ''}"
+    title = f"{staff.last_name} {staff.first_name[0]}. {staff.first_name[0] + '.' if len(staff.first_name) > 0 else ''}"
     return Response({'permissions': permissions, 'user_title': title}, status=200)
 
 @api_view(['POST', 'DELETE', 'PUT', 'GET'])
