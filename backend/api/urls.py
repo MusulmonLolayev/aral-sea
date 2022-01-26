@@ -26,7 +26,11 @@ urlpatterns = [
     # /districts_by_region/regionId
     path('districts_by_region/<regionId>', DistrictListView.as_view()),
 
+    path('district_request', district_request),
+
     path('farm_request/<id>', FarmListView.as_view()),
+    path('district_farms/<district_id>', farm_request),
+    path('farm_request1', farm_request1),
 
     path('well_request/<int:id>', well_request),
     path('well_request', well_request),
@@ -37,7 +41,7 @@ urlpatterns = [
 
     path('user_permissions/<app_name>/<model_name>', user_permissions),
 
-    path('get_permission', get_permission),
+    path('get_user_information', get_user_information),
 
     path('user_gourps', user_groups),
 

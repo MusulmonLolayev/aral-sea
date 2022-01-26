@@ -16,7 +16,7 @@
       <template v-slot:top-right="props">
         <div class="row">
           <q-btn-group style="margin-right: 30px; margin-top: 5px" flat>
-            <q-btn icon="add" to='/staffs/0'>
+            <q-btn icon="add" to="/staffs/0">
               <q-tooltip>{{ $t("new_item").format_letter() }}</q-tooltip>
             </q-btn>
             <q-btn
@@ -95,12 +95,42 @@ export default {
         }
       });
     },
-    editItem(){
-      this.$router.push('staffs/' + this.selectedItems[0].id)
+    editItem() {
+      this.$router.push("staffs/" + this.selectedItems[0].id);
     },
-    deleteItem(){
-      
-    },
+    deleteItem() {
+      this.$q
+        .dialog({
+          title: this.$t("confirm").format_letter(),
+          message: this.$t("would_like_delete").format_letter(),
+          cancel: true,
+          persistent: true
+        })
+        .onOk(() => {
+          this.$axios
+            .delete("/users", {
+              data: {
+                user: { id: this.selectedItems[0].user },
+                staff: { id: this.selectedItems[0].id }
+              }
+            })
+            .then(() => {
+              this.$q.notify({
+                message: this.$t("deleted").format_letter(),
+                color: "blue",
+                icon: "success",
+                actions: [
+                  { label: this.$t("close").format_letter(), color: "white" }
+                ]
+              });
+              let selected_index = this.items.indexOf(this.selectedItems[0])
+              this.items.splice(selected_index, 1);
+            })
+            .catch(error => {
+              console.log(error);
+            });
+        });
+    }
   },
   beforeMount() {
     this.initialize();

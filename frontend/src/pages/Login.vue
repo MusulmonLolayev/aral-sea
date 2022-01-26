@@ -93,9 +93,11 @@ export default {
             "Authorization"
           ] = `Bearer ${response.data.access}`;
           this.$router.go(-1);
-          this.$axios.get("/get_permission").then(response => {
-            this.$store.dispatch("auth/user_permissions", {
-              user_permissions: response.data
+
+          // Get user information
+          this.$axios.get("/get_user_information").then(response => {
+            this.$store.dispatch("auth/user_information", {
+              user_information: response.data
             });
           });
         })

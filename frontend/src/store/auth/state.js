@@ -12,6 +12,7 @@ export default function() {
     access_token: localStorage.getItem("access_token"),
     refresh_token: localStorage.getItem("refresh_token"),
     user_role: localStorage.getItem("user_role"),
-    user_permissions: user_permissions
+    user_permissions: user_permissions,
+    user_title: localStorage.getItem('user_title'),
   };
 }

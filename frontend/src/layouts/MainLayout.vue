@@ -21,14 +21,17 @@
           <q-btn flat dense borderless :label="$t('login').format_letter()" to="/login" />
         </div>
 
+        <div style="float: right; margin-right: 10px">
+          {{$store.state.auth.user_title}}
+        </div>
+
         <div style="float: right">
           <select-localization />
         </div>
 
         <q-icon
-          name="fas fa-signal"
+          :name="$store.state.common.IsOnline? 'signal_cellular_alt': 'signal_cellular_off'"
           style="margin-left: 10px; margin-right: 10px"
-          v-if="$store.state.common.IsOnline == true"
         />
       </q-toolbar>
     </q-header>

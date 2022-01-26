@@ -48,6 +48,15 @@
                 $t("staffs").format_letter()
               }}</q-item-section>
             </q-item>
+            
+            <q-item clickable to="/farms" style="margin-left:20px" v-if="IsPermission('view_farm')">
+              <q-item-section avatar>
+                <q-icon color="primary" name="agriculture" />
+              </q-item-section>
+              <q-item-section>{{
+                $t("farms").format_letter()
+              }}</q-item-section>
+            </q-item>
           </q-list>
         </q-expansion-item>
         <q-expansion-item
@@ -86,7 +95,7 @@ export default {
     logout() {
       this.$store.dispatch("auth/logout").then(() => {
         if (this.$router.currentRoute.path != "/") {
-          this.$router.push("/");
+          this.$router.push("login");
         }
       });
     },

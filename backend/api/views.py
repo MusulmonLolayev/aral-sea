@@ -1,4 +1,6 @@
+from copy import error
 import re
+from turtle import st
 from django.db.models import query
 from django.shortcuts import render
 
@@ -19,6 +21,7 @@ from django.db import transaction
 from .serializer import *
 
 import traceback
+
 
 def get_user_role(request):
     # roles by groups: texniklar=0, tuman_administratorlari = 1 for just now
@@ -63,15 +66,7 @@ class DistrictListView(ListAPIView):
         This view should return a list of all the districts
         for the currently region.
         """
-        #regionId = self.kwargs['regionId']
-        #reg_districts = District.objects.filter(region_id=regionId)
-        #districts = []
         user_districts = self.request.user.staff.districts.all()
-        """print(user_districts)
-        for district in reg_districts:
-            print(district in user_districts)
-            if district in user_districts:
-                districts.append(district)"""
         return user_districts
 
 class FarmListView(ListAPIView):
@@ -122,6 +117,40 @@ class MusterPumpingListView(ListAPIView):
             well_id = int(self.kwargs['well_id'])
             return MusterPumping.objects.filter(well=well_id)
         return MusterPumping.objects.filter()
+
+@api_view(['GET'])
+def farm_request(request, district_id=0):
+    if request.method == "GET":
+        return Response(FarmSerializer(Farm.objects.filter(district=district_id), many=True).data, status=200)
+
+@api_view(['POST', 'DELETE', 'PUT'])
+def farm_request1(request):
+    
+    if request.method == "POST":
+        ser_obj = FarmSerializer(data=request.data)
+        if ser_obj.is_valid():
+            ser_obj.save()
+            return Response(ser_obj.data.get('id'), status=201)
+        else:
+            return Response("Not acceptable", status=406)
+    print(request.data)
+
+    # find suitable instance
+    try:
+        instance = Farm.objects.get(id=request.data.get('id'))
+    except:
+        return Response(status=404)
+     # Update object
+    if request.method == 'PUT':
+        serializer = FarmSerializer(instance, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(status=200)
+        else:
+            return Response(serializer.errors, status=406)
+    else:
+        instance.delete()
+        return Response('Deleted', status=200)
 
 @api_view(['POST', 'DELETE', 'PUT', 'GET'])
 def well_request(request, id=0):
@@ -221,6 +250,11 @@ def muster_pumping_request(request):
     except:
         Response(status=500)
 
+@api_view(['GET'])
+def district_request(request):
+    if request.method == "GET":
+        return Response(DistrictSerializer(District.objects.all(), many=True).data, status=200)
+
 @api_view(["GET"])
 def user_permissions(request, app_name, model_name):
     permissions = {
@@ -271,33 +305,34 @@ def attach_well_to_technician(request):
             well.save()
     return Response(status=200)
 
-@api_view(['GET', 'POST'])
+@api_view(['GET'])
 def staff_request(request, id=0):
-    if request.method == 'GET':
-        if id == 0:
-            user_districts = request.user.staff.districts.all()
-            if len(user_districts) != 0:
-                staffs = []
-                for district in user_districts:
-                    for item in Staff.objects.filter(districts=district):
-                        if (not (item in staffs)) and item.position.priority == request.user.staff.position.priority - 1:
-                            staffs.append(item)
-                return Response(StaffSerializer(staffs, many=True).data, status=200)
-            else:
-                return Response(StaffSerializer(Staff.objects.all(), many=True).data, status=200)
+    if id == 0:
+        user_districts = request.user.staff.districts.all()
+        if len(user_districts) != 0:
+            staffs = []
+            for district in user_districts:
+                for item in Staff.objects.filter(districts=district):
+                    if (not (item in staffs)) and item.position.priority == request.user.staff.position.priority - 1:
+                        staffs.append(item)
+            return Response(StaffSerializer(staffs, many=True).data, status=200)
         else:
-            staff = Staff.objects.get(pk=id)
-            user = staff.user
-            response = {"staff": StaffSerializer(staff).data, "user": {'id': user.id, 'username': user.username}}
-            return Response(response, status=200)
+            return Response(StaffSerializer(Staff.objects.all(), many=True).data, status=200)
+    else:
+        staff = Staff.objects.get(pk=id)
+        user = staff.user
+        response = {"staff": StaffSerializer(staff).data, "user": {'id': user.id, 'username': user.username}}
+        return Response(response, status=200)
 
-@api_view(['POST', 'PUT'])
+@api_view(['POST', 'PUT', "DELETE"])
 @transaction.atomic
 def user_request(request):
     if request.method == 'POST':
         user = UserSerializer(data=request.data.get('user'))
         staff = StaffSerializer(data=request.data.get('staff'))
-        if user.is_valid() and staff.is_valid():
+        is_user_valid = user.is_valid()
+        is_staff_valid = staff.is_valid()
+        if is_user_valid and is_staff_valid:
             # add to group by position
             position = Position.objects.get(pk=request.data.get('staff').get('position'))
 
@@ -312,16 +347,25 @@ def user_request(request):
             response = {"user": user_instance.id, "staff": staff.instance.id}
             return Response(response, status=200)
         else:
-            return Response('Not acceptable', status=406)
-    if request.method == 'PUT':
-        
-        user_instance = User.objects.get(pk=request.data.get('user').get('id'))
+            error_msg = {}
+            if not is_user_valid:
+                error_msg['user_errors'] = user.errors
+            if not is_staff_valid:
+                error_msg['staff_errors'] = staff.errors
+            return Response(error_msg, status=406)
+    try:
         staff_instance = Staff.objects.get(pk=request.data.get('staff').get('id'))
+        user_instance = User.objects.get(pk=request.data.get('user').get('id'))
+    except:
+        return Response("Not Found", status=404)
 
+    if request.method == 'PUT':
         user = UserSerializer(data=request.data.get('user'), instance=user_instance)
         staff = StaffSerializer(data=request.data.get('staff'), instance=staff_instance)
 
-        if user.is_valid() and staff.is_valid():
+        is_user_valid = user.is_valid()
+        is_staff_valid = staff.is_valid()
+        if is_user_valid and is_staff_valid:
             # add to group by position
             new_position = Position.objects.get(pk=request.data.get('staff').get('position'))
 
@@ -332,7 +376,18 @@ def user_request(request):
 
             return Response("Ok", status=200)
         else:
-            return Response('Not acceptable', status=406)
+            error_msg = {}
+            if not is_user_valid:
+                error_msg['user_errors'] = user.errors
+            if not is_staff_valid:
+                error_msg['staff_errors'] = staff.errors
+            return Response(error_msg, status=406)
+
+    else:
+        user_instance.delete()
+        staff_instance.delete()
+
+        return Response("Deleted", status=200)
 
 @api_view(['GET'])
 def position_request(reqeust):
@@ -345,9 +400,11 @@ def group_request(reqeust):
         return Response(GroupSerializer(Group.objects.all(), many=True).data, status=200)
 
 @api_view(['GET'])
-def get_permission(request):    
+def get_user_information(request):
     permissions = get_user_permissions(request.user)
-    return Response(permissions, status=200)
+    staff = request.user.staff
+    title = f"{staff.last_name} {staff.first_name[0]}. {staff.first_name[0] + '.' if len(staff.first_name) else ''}"
+    return Response({'permissions': permissions, 'user_title': title}, status=200)
 
 @api_view(['POST', 'DELETE', 'PUT', 'GET'])
 def ugv_request(request, well_id=0):
