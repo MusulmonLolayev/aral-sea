@@ -142,7 +142,6 @@ export default ({ store, Vue, router }) => {
           // 403 Forbidden
           case 403:
             {
-              console.log("ssss");
               // just the necessary permissions are dealed
               Dialog.create({
                 title: helper.lang("error_in_permission"),
@@ -177,10 +176,6 @@ export default ({ store, Vue, router }) => {
               });
             }
             break;
-        }
-
-        // Check Internal server error
-        if (error.response.status === 500) {
         }
         return Promise.reject(error);
       }

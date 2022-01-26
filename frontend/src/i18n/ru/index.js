@@ -30,6 +30,7 @@ export default {
   actions: 'действия',
   add: 'добавить',
   edit: 'редактировать',
+  updated: "обновлено",
   new_item: 'новый запис',
   edited: 'данные были успешно отредактированы',
   unedited: 'данные не были успешно отредактированы',
@@ -151,6 +152,10 @@ export default {
 
   // Models names: farms: 
   farms: "фермы",
+  farm_name: "название фермы",
+
+   // Models names: districts: 
+   select_district: "выберите район",
 
   // Ugv
   ugv_value: "значение угв",

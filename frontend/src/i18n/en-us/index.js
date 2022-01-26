@@ -30,6 +30,7 @@ export default {
   actions: 'actions',
   add: 'add',
   edit: 'edit',
+  updated: "updated",
   new_item: 'new item',
   edited: 'data was edited successfully',
   unedited: 'data was not edited successfully',
@@ -151,6 +152,10 @@ export default {
 
   // Models names: farms: 
   farms: "farms",
+  farm_name: "xo'jalik nomi",
+
+  // Models names: districts: 
+  select_district: "select district",
 
   // Ugv
   ugv_value: "ugv value",

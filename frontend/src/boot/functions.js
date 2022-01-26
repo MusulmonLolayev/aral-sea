@@ -210,6 +210,14 @@ let helper = {
     }
     return defaultItem
   },
+
+  farm(){
+    return {
+      id: 0,
+      name: "",
+      district: null,
+    }
+  }
 }
 
 export default ({ store, Vue }) => {

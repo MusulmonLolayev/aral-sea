@@ -139,6 +139,9 @@ class SoilDeep(models.Model):
     soil_type = models.ForeignKey(SoilType, on_delete = models.CASCADE)
     muster_soil = models.ForeignKey(MusterSoil, on_delete=models.SET_NULL, null=True)
 
+    def __str__(self):
+        return f"{self.from_deep}-{self.to_deep} sm"
+
 class AnalysisSoil(models.Model):
     muster_soil = models.OneToOneField(MusterSoil, on_delete=models.SET_NULL, null=True)
     electric_wire  = models.FloatField(default=0)

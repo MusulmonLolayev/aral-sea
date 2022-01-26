@@ -30,6 +30,7 @@ export default {
   actions: 'harakatlar',
   add: "qo'shish",
   edit: 'tahrirlash',
+  updated: "tahirlandi",
   new_item: "yangi yozuv",
   edited: "ma'lumotlar muvaffaqiyatli o'zgartirildi",
   unedited: "ma'lumotlar muvaffaqiyatli o'zgartirilmadi",
@@ -152,6 +153,10 @@ export default {
 
   // Models names: farms: 
   farms: "xo'jaliklar",
+  farm_name: "xo'jalik nomi",
+
+  // Models names: districts: 
+   select_district: "tumani tanlang",
   
   // Ugv
   ugv_value: "ugv qiymati",
