@@ -59,11 +59,12 @@
           <div class="col-5">
             <q-input
               v-model="muster_soil.area_size"
-              :label="$t('area_size').format_letter()"
+              :label="$t('area_size').format_letter() + '(' + $t('hectare') + ')'"
               type="number"
               style="margin-right: 30px"
               :rules="[() => required('area_size')]"
               :readonly="!IsPermission('add_mustersoil')"
+              :suffix="$t('hectare')"
             />
           </div>
           <div class="col-5">
