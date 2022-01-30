@@ -39,9 +39,8 @@
             <q-input
               v-model="muster_soil.contour_no"
               :label="$t('contour_no').format_letter()"
-              type="number"
               style="margin-right: 30px"
-              :rules="[() => required('contour_no')]"
+              :rules="[(val) => !val | $t('required')]"
               :readonly="!IsPermission('add_mustersoil')"
             />
           </div>
@@ -196,7 +195,7 @@ export default {
   name: "muster-soil",
   data: function() {
     return {
-      muster_soil: {},
+      muster_soil: this.$helper.muster_soil(),
       farms: [],
       salt_degrees: [],
       crop_types: [],

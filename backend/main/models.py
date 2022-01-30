@@ -116,7 +116,7 @@ class CropType(models.Model):
 
 class MusterSoil(models.Model):
     well = models.ForeignKey(Well, on_delete = models.CASCADE, null = True)
-    contour_no = models.IntegerField(default=0)
+    contour_no = models.CharField(max_length=40)
     pit_no = models.IntegerField(default=0)
     area_size = models.FloatField(default=0)
     salt_degree = models.ForeignKey(SaltDegree, on_delete = models.CASCADE)
