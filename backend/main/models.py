@@ -152,3 +152,12 @@ class AnalysisSoil(models.Model):
     mg = models.FloatField(default=0)
 
     user = models.ForeignKey(User, on_delete = models.SET_NULL, null=True)
+
+class ReportFakeModel(models.Model):
+
+    class Meta:
+        managed = False
+        default_permissions = ()
+        permissions = (
+            ('can_report', 'Reporting rights'),
+        )
