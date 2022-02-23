@@ -14,6 +14,7 @@ const routes = [
       { path: 'soil', component: () => import('pages/MusterSoilList.vue') },
       { path: 'soil/:id', component: () => import('pages/MusterSoilDetail.vue') },
       { path: 'farms', component: () => import('pages/FarmList.vue') },
+      { path: 'reports', component: () => import('pages/Reports.vue') },
     ]
   },
 

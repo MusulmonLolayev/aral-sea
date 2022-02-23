@@ -1,18 +1,12 @@
-from copy import error
-import re
-from turtle import st
-from django.db.models import query
-from django.shortcuts import render
-
-from rest_framework.generics import ListAPIView, ListCreateAPIView, RetrieveUpdateDestroyAPIView
-from rest_framework.views import APIView
+import imp
+from unicodedata import name
+from django.http import HttpResponse
+from grpc import Status
+from rest_framework.generics import ListAPIView
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
-from rest_framework import status
 from rest_framework.response import Response
-from rest_framework.authentication import SessionAuthentication, BasicAuthentication
-from rest_framework.permissions import IsAuthenticated, AllowAny, DjangoModelPermissions
-
-from django.contrib.auth.models import Permission
+from rest_framework.authentication import BasicAuthentication
+from rest_framework.permissions import IsAuthenticated, DjangoModelPermissions
 
 from main.models import *
 
@@ -22,6 +16,11 @@ from .serializer import *
 
 import traceback
 
+from openpyxl import load_workbook
+from openpyxl.styles import Alignment, NamedStyle, Font, Border, Side
+from openpyxl.writer.excel import save_virtual_workbook
+from django.conf import settings
+import os
 
 def get_user_role(request):
     # roles by groups: texniklar=0, tuman_administratorlari = 1 for just now
@@ -205,7 +204,7 @@ def well_request(request, id=0):
             return Response('Deleted', status=200)
     except:
         traceback.print_exc()
-        Response(status=500)
+        return Response(status=500)
 
 @api_view(['POST', 'DELETE', 'PUT'])
 def muster_pumping_request(request):
@@ -248,7 +247,7 @@ def muster_pumping_request(request):
             instance.delete()
             return Response('Deleted', status=200)
     except:
-        Response(status=500)
+        return Response(status=500)
 
 @api_view(['GET'])
 def district_request(request):
@@ -454,7 +453,7 @@ def ugv_request(request, well_id=0):
             return Response('Deleted', status=200)
     except:
         traceback.print_exc()
-        Response(status=500)
+        return Response(status=500)
 
 @api_view(['POST', 'DELETE', 'PUT', 'GET'])
 def mgv_request(request, well_id=0):
@@ -498,10 +497,15 @@ def mgv_request(request, well_id=0):
             return Response('Deleted', status=200)
     except:
         traceback.print_exc()
-        Response(status=500)        
+        return Response(status=500)
 
-@api_view(['GET'])
+
+@authentication_classes([BasicAuthentication])
+@permission_classes([IsAuthenticated])
+@api_view(['POST'])
 def ugv_from_weighter(request):
+    print(request.data)
+    print(request)
     return Response("Ok", status=200)
 
 
@@ -553,7 +557,7 @@ def muster_soil_request(request, id=0):
             return Response('Deleted', status=200)
     except:
         traceback.print_exc()
-        Response(status=500)
+        return Response(status=500)
 
 @api_view(['GET'])
 def farms_by_user_district(request):
@@ -565,7 +569,7 @@ def farms_by_user_district(request):
         return Response(FarmSerializer(query, many=True).data, status=200)
     except:
         traceback.print_exc()
-        Response(status=500)
+        return Response(status=500)
 
 @api_view(['GET'])
 def well_by_farm(request, farm_id):
@@ -573,7 +577,7 @@ def well_by_farm(request, farm_id):
         return Response(WellSerializer(Well.objects.filter(farm=farm_id), many=True).data, status=200)
     except:
         traceback.print_exc()
-        Response(status=500)
+        return Response(status=500)
 
 @api_view(["GET"])
 def salt_degree_request(request):
@@ -581,7 +585,7 @@ def salt_degree_request(request):
         return Response(SaltDegreeSerializer(SaltDegree.objects.all(), many=True).data, status=200)
     except:
         traceback.print_exc()
-        Response(status=500)
+        return Response(status=500)
 
 @api_view(["GET", "POST", "PUT", "DELETE"])
 def soil_deep_request(request, mustersoilid=0):
@@ -590,7 +594,7 @@ def soil_deep_request(request, mustersoilid=0):
             if mustersoilid != 0:
                 return Response(SoilDeepSerializer(SoilDeep.objects.filter(muster_soil=mustersoilid), many=True).data, status=200)
             else:
-                Response(status=400)
+               return Response(status=400)
         
         # Create object
         if request.method == 'POST':
@@ -620,7 +624,7 @@ def soil_deep_request(request, mustersoilid=0):
             return Response('Deleted', status=200)
     except:
         traceback.print_exc()
-        Response(status=500)
+        return Response(status=500)
 
 @api_view(["GET"])
 def soil_type_request(request):
@@ -628,7 +632,7 @@ def soil_type_request(request):
         return Response(SoilTypeSerializer(SoilType.objects.all(), many=True).data, status=200)
     except:
         traceback.print_exc()
-        Response(status=500)
+        return Response(status=500)
 
 @api_view(["GET"])
 def crop_type_request(request):
@@ -636,7 +640,7 @@ def crop_type_request(request):
         return Response(CropTypeSerializer(CropType.objects.all(), many=True).data, status=200)
     except:
         traceback.print_exc()
-        Response(status=500)
+        return Response(status=500)
 
 @api_view(["GET", "POST", "PUT", "DELETE"])
 def analysis_soil_request(request, mustersoilid=0):
@@ -679,3 +683,166 @@ def analysis_soil_request(request, mustersoilid=0):
     except:
         traceback.print_exc()
         Response(status=500)
+
+@api_view(['GET'])
+def report_view(request, district, date):
+
+    year, month, _ = date.split('-')
+    year = int(year)
+    month = int(month)
+    wb = load_workbook(os.path.join(
+        settings.BASE_DIR, 'reports', 'a6.xlsx'))
+    sheet = wb.active
+    
+    center_align = Alignment(horizontal='center', vertical='center')
+    vertical_text = Alignment(horizontal='center', vertical='center', textRotation=90)
+    bd = Side(style='thin', color="000000")
+    border = Border(left=bd, top=bd, right=bd, bottom=bd)
+
+    general_style = NamedStyle(name='a_style', alignment=center_align, border=border)
+    general_bold_style = NamedStyle(
+        name='general_bold_style', alignment=center_align, font=Font(b=True))
+    bc_style = NamedStyle(name='bc_style', alignment=vertical_text, border=border)
+    center_no_border = NamedStyle(name='center_no_border', alignment=center_align)
+
+    obj_dist = District.objects.get(pk=district)
+    sheet.title = obj_dist.name
+    sheet['A1'] = f'{obj_dist.name} туманидаги мелиоратив кудуклардаги ер ости сувларини жойлашиши хакида '
+    sheet['A2'] = f'МАЪЛУМОТ      {month}  ойи {year} й'
+    sheet.merge_cells('A1:P1')
+    sheet.merge_cells('A2:P2')
+    sheet['A1'].style = center_no_border
+    sheet['A2'].style = center_no_border
+
+    farms = Farm.objects.filter(district=district)
+    farm_number = 1
+    row_number = 7
+    try:
+        for farm in farms:
+
+            wells = Well.objects.filter(farm=farm)
+            well_count = len(wells)
+
+            #print(f'A{row_number}')
+            sheet[f'A{row_number}'] = farm_number
+            sheet[f'B{row_number}'] = farm.name
+
+            sheet[f'A{row_number}'].style = general_style
+            sheet[f'B{row_number}'].style = bc_style
+            sheet[f'C{row_number}'].style = bc_style
+
+            if well_count > 0:
+                if wells[0].user is not None:
+                    staff = wells[0].user.staff
+                    sheet[f'C{row_number}'] = staff.last_name + staff.first_name
+                else:
+                    sheet[f'C{row_number}'] = "Staff not found"
+
+            sheet.merge_cells(f'A{row_number}:A{row_number + well_count}')
+            sheet.merge_cells(f'B{row_number}:B{row_number + well_count - 1}')
+            sheet.merge_cells(f'C{row_number}:C{row_number + well_count - 1}')
+            sheet.merge_cells(
+                f'B{row_number + well_count}:D{row_number + well_count}')
+
+            sum_area = 0
+            for well in wells:
+                sum_area += well.area
+                sheet[f'D{row_number}'] = well.area
+                sheet[f'E{row_number}'] = well.number
+                sheet[f'P{row_number}'] = well.label
+
+                ugvs = MusterPumping.objects.filter(
+                    well=well, date__year=year, date__month=month)
+                
+                first_dec = 0
+                first_dec_count = 0
+                
+                second_dec = 0
+                second_dec_count = 0
+
+                third_dec = 0
+                third_dec_count = 0
+
+                bottom = 0
+                bottom_count = 0
+
+                sum_first_dec = 0
+                sum_second_dec = 0
+                sum_third_dec = 0
+
+                for ugv in ugvs:
+                    if ugv.date.day <= 10:
+                        first_dec += ugv.ugv_before_pumping
+                        first_dec_count += 1
+                    elif ugv.date.day <= 20:
+                        second_dec += ugv.ugv_before_pumping
+                        second_dec_count += 1
+                    else:
+                        third_dec += ugv.ugv_before_pumping
+                        third_dec_count += 1
+
+                    bottom += ugv.bottom
+                    bottom_count += 1
+                    
+                if first_dec_count != 0:
+                    first_dec /= first_dec_count
+                if second_dec_count != 0:
+                    second_dec /= second_dec_count
+                if third_dec_count != 0:
+                    third_dec /= third_dec_count
+                if bottom_count > 0:
+                    bottom /= bottom_count
+
+                sum_first_dec += first_dec
+                sum_second_dec += second_dec
+                sum_third_dec += third_dec
+
+                sheet[f'F{row_number}'] = first_dec
+                sheet[f'G{row_number}'] = second_dec
+                sheet[f'H{row_number}'] = third_dec
+                sheet[f'I{row_number}'] = (first_dec + second_dec + third_dec) / 3
+                sheet[f'O{row_number}'] = bottom
+
+                row_number += 1
+            
+            ugv_count = len(ugvs)
+
+            if sum_first_dec != 0:
+                sum_first_dec /= ugv_count
+            if sum_second_dec != 0:
+                sum_second_dec /= ugv_count
+            if sum_third_dec != 0:
+                sum_third_dec /= ugv_count
+            
+            sheet[f'F{row_number}'] = sum_first_dec
+            sheet[f'G{row_number}'] = sum_second_dec
+            sheet[f'H{row_number}'] = sum_third_dec
+            
+            sheet[f'F{row_number}'] = first_dec
+            sheet[f'G{row_number}'] = second_dec
+            sheet[f'H{row_number}'] = third_dec
+            sheet[f'I{row_number}'] = (first_dec + second_dec + third_dec) / 3
+
+            sheet[f'B{row_number}'] = f'{sum_area / well_count:.2f}'
+            sheet[f'E{row_number}'] = well_count
+
+            sheet[f'B{row_number}'].style = general_bold_style
+            sheet[f'E{row_number}'].style = general_bold_style
+
+            farm_number += 1
+            row_number += 1
+    except:
+        traceback.print_exc()
+    for i in range(7, row_number):
+        for letter in ('D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P'):
+            sheet[f'{letter}{i}'].style = general_style
+    #wb.save('D:/a6_res.xlsx')
+    #wb.close()
+
+    response = HttpResponse(content=save_virtual_workbook(
+        wb), content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+
+    response['Content-Disposition'] = 'attachment; filename=myexport.xlsx'
+    return response
+
+    #return HttpResponse("", 200)

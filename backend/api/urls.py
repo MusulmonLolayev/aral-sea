@@ -88,6 +88,7 @@ urlpatterns = [
 
     path('analysis_soil_request', analysis_soil_request),
     path('analysis_soil_request/<int:mustersoilid>', analysis_soil_request),
+    path('report_view/<int:district>/<str:date>', report_view),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

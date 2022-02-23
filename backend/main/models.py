@@ -96,7 +96,7 @@ class Ugv(models.Model):
     well = models.ForeignKey(Well, on_delete = models.CASCADE)
     staff = models.ForeignKey(Staff, on_delete = models.SET_NULL, null = True)
     degree = models.FloatField(default=0)
-    date = models.DateField(default=datetime.date.today)
+    date = models.DateTimeField(default=datetime.datetime.now())
 
 class Mgv(models.Model):
     well = models.ForeignKey(Well, on_delete = models.CASCADE)

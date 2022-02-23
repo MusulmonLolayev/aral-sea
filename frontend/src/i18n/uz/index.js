@@ -84,6 +84,8 @@ export default {
   save_and_back: "saqlash va qaytish",
   passwordsnotmatched: "parollar mos emas",
   min_char_6: "6 belgidan ko'p bo'lishi kerak",
+  select_date: "sanani tanlang",
+  report: "hisobot",
 
   // App names
   app_name: "orol degizining monitoring tizimi",
@@ -170,6 +172,11 @@ export default {
   choose_technician: "texnikni tanlang",
   attached: "bog'landi",
   go_detail: "batafsil",
+
+  // Report Window
+
+  reports: "hisobotlar",
+  application_6a: "6a ilova",
 
   // Common names
   staffs: "xodimlar",

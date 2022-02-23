@@ -87,6 +87,8 @@ export default {
   save_and_back: 'save and back',
   passwordsnotmatched: 'passwords not matched',
   min_char_6: 'must be more than 6 symbols',
+  select_date: 'select date',
+  report: 'report',
 
   // Common model names
   last_name: 'last name',
@@ -170,6 +172,11 @@ export default {
   choose_technician: "choose technician",
   attached: 'attached',
   go_detail: 'go detail',
+
+  // Report Window
+
+  reports: 'reports',
+  application_6a: 'application 6a',
 
   // Common names
   staffs: "staffs",

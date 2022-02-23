@@ -1,11 +1,13 @@
 import axios from "axios";
 import { Loading } from "quasar";
-import { Notify } from "quasar";
 import { Dialog } from "quasar";
 import { helper } from "./functions";
-import router from "src/router";
 
-const baseURL = "http://127.0.0.1:8000/api";
+let baseURL = "http://127.0.0.1:8000/api";
+
+if (process.env.PROD) {
+  baseURL = "https://ecoaral.uz/api";
+}
 
 const axiosConfig = {
   baseURL: baseURL,

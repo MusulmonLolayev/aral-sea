@@ -57,6 +57,15 @@
                 $t("farms").format_letter()
               }}</q-item-section>
             </q-item>
+
+            <q-item clickable to="/reports" style="margin-left:20px" v-if="IsPermission('can_report')">
+              <q-item-section avatar>
+                <q-icon color="primary" name="leaderboard" />
+              </q-item-section>
+              <q-item-section>{{
+                $t("reports").format_letter()
+              }}</q-item-section>
+            </q-item>
           </q-list>
         </q-expansion-item>
         <q-expansion-item
