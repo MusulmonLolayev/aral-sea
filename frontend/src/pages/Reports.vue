@@ -26,7 +26,39 @@
       </div>
 
       <div class="col-2" style="margin-top: 20px; margin-left:30px;">
-        <q-btn @click="onReport" icon="leaderboard">
+        <q-btn @click="onReport6a" icon="leaderboard">
+          {{ $t("report") }}
+        </q-btn>
+      </div>
+    </div>
+
+    <h4 style="margin: 10px">{{ $t("soil_analysis_report").format_letter() }}</h4>
+    <q-separator color="orange" />
+    <div class="row">
+      <div class="col-5">
+        <q-select
+          :label="$t('select_district').format_letter()"
+          :options="districts"
+          option-value="id"
+          option-label="name"
+          emit-value
+          map-options
+          v-model="district"
+          style="margin-right: 30px"
+          :rules="[selected => selected != null]"
+        />
+      </div>
+
+      <div class="col-2">
+        <q-input
+          v-model="selected_date"
+          :label="$t('select_date').format_letter()"
+          type="date"
+        />
+      </div>
+
+      <div class="col-2" style="margin-top: 20px; margin-left:30px;">
+        <q-btn @click="onReportSoilAnalysis" icon="leaderboard">
           {{ $t("report") }}
         </q-btn>
       </div>
@@ -60,9 +92,23 @@ export default {
       return false;
     },
 
-    onReport() {
+    onReport6a() {
       this.$axios
-        .get("report_view/" + this.district + "/" + this.selected_date, {responseType: 'blob'})
+        .get("report-6a/" + this.district + "/" + this.selected_date, {responseType: 'blob'})
+        .then(response => {
+          var headers = response.headers;
+          var blob = new Blob([response.data], {
+            type: headers["content-type"]
+          });
+          var link = document.createElement("a");
+          link.href = window.URL.createObjectURL(blob);
+          link.download = this.districts.find(item => item.id == this.district).name + ".xlsx";
+          link.click();
+        });
+    },
+    onReportSoilAnalysis(){
+      this.$axios
+        .get("report-soil-analysis/" + this.district + "/" + this.selected_date, {responseType: 'blob'})
         .then(response => {
           var headers = response.headers;
           var blob = new Blob([response.data], {

@@ -177,6 +177,7 @@ export default {
 
   reports: "hisobotlar",
   application_6a: "6a ilova",
+  soil_analysis_report: "tuproq tahlili hisoboti",
 
   // Common names
   staffs: "xodimlar",

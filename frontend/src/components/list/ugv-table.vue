@@ -136,6 +136,7 @@ export default {
       let item = this.selectedItems[0];
       this.editedIndex = this.items.indexOf(item);
       this.editedItem = this.toObject(item);
+      this.editedItem.date = this.editedItem.date.substring(0, 10)
       this.dialog = true;
     },
     async deleteItem(item) {
@@ -200,7 +201,7 @@ export default {
         });
         return;
       }
-
+      this.editedItem.date = new Date(this.editedItem.date).toISOString()
       let response = await this.$helper.saveInstance(
         this.editedItem,
         'ugv_request'

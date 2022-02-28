@@ -153,6 +153,13 @@ class AnalysisSoil(models.Model):
 
     user = models.ForeignKey(User, on_delete = models.SET_NULL, null=True)
 
+class YieldSize(models.Model):
+    district = models.ForeignKey(District, on_delete=models.SET_NULL, null=True)
+    cropt_type = models.ForeignKey(CropType, on_delete=models.SET_NULL, null=True)
+    salt_degree = models.ForeignKey(SaltDegree, on_delete=models.SET_NULL, null=True)
+    size = models.FloatField(default=0)
+    year = models.DateField(default=datetime.date.today)
+
 class ReportFakeModel(models.Model):
 
     class Meta:

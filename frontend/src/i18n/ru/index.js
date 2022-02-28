@@ -176,6 +176,7 @@ export default {
 
   reports: "отчеты",
   application_6a: "приложение 6а",
+  soil_analysis_report: "отчет об анализе почвы",
 
   // Common names
   staffs: "сотрудники",

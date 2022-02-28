@@ -1,11 +1,8 @@
-import imp
-from unicodedata import name
 from django.http import HttpResponse
-from grpc import Status
 from rest_framework.generics import ListAPIView
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.response import Response
-from rest_framework.authentication import BasicAuthentication
+from rest_framework.authentication import BasicAuthentication, TokenAuthentication
 from rest_framework.permissions import IsAuthenticated, DjangoModelPermissions
 
 from main.models import *
@@ -16,11 +13,15 @@ from .serializer import *
 
 import traceback
 
+import datetime
+
 from openpyxl import load_workbook
 from openpyxl.styles import Alignment, NamedStyle, Font, Border, Side
 from openpyxl.writer.excel import save_virtual_workbook
 from django.conf import settings
 import os
+
+from django.contrib.auth.decorators import permission_required
 
 def get_user_role(request):
     # roles by groups: texniklar=0, tuman_administratorlari = 1 for just now
@@ -684,8 +685,82 @@ def analysis_soil_request(request, mustersoilid=0):
         traceback.print_exc()
         Response(status=500)
 
+def get_degrees_by_decades(well, year, month):
+    ugvs = Ugv.objects.filter(well=well, date__year=year, date__month=month)
+
+    first_dec = 0
+    first_dec_count = 0
+
+    second_dec = 0
+    second_dec_count = 0
+
+    third_dec = 0
+    third_dec_count = 0
+
+    for ugv in ugvs:
+        if ugv.date.day <= 10:
+            first_dec += ugv.degree
+            first_dec_count += 1
+        elif ugv.date.day <= 20:
+            second_dec += ugv.degree
+            second_dec_count += 1
+        else:
+            third_dec += ugv.degree
+            third_dec_count += 1
+
+        if first_dec_count != 0:
+            first_dec /= first_dec_count
+        if second_dec_count != 0:
+            second_dec /= second_dec_count
+        if third_dec_count != 0:
+            third_dec /= third_dec_count
+
+    return first_dec, second_dec, third_dec
+
+def notZero(val):
+    return val != 0 and val is not None
+def notZeroMean(*vals):
+    not_zero_count = 0
+    not_zero_sum = 0
+    for val in vals:
+        if notZero(val):
+            not_zero_count += 1
+            not_zero_sum += val
+    if not_zero_count != 0:
+        return not_zero_sum / not_zero_count
+    else:
+        return 0
+
+def get_closest_to_date(Class, date, well):
+    greater = Class.objects.filter(well=well, date__gte=date).order_by("date").first()
+    less = Class.objects.filter(well=well, date__lte=date).order_by("-date").first()
+
+    if greater and less:
+        return greater if abs(greater.date - date) < abs(less.date - date) else less
+    elif greater is not None:
+        return greater
+    elif less is not None:
+        return less
+    else:
+        return None
+
 @api_view(['GET'])
-def report_view(request, district, date):
+def report_6a(request, district, date):
+
+    months_dict = {
+        1: 'январь',
+        2: 'февраль',
+        3: 'март',
+        4: 'апрель',
+        5: 'май',
+        6: 'июнь',
+        7: 'июль',
+        8: 'августь',
+        9: 'сентябрь',
+        10: 'откябрь',
+        11: 'ноябрь',
+        12: 'декабрь',
+    }
 
     year, month, _ = date.split('-')
     year = int(year)
@@ -693,26 +768,33 @@ def report_view(request, district, date):
     wb = load_workbook(os.path.join(
         settings.BASE_DIR, 'reports', 'a6.xlsx'))
     sheet = wb.active
-    
+
     center_align = Alignment(horizontal='center', vertical='center')
-    vertical_text = Alignment(horizontal='center', vertical='center', textRotation=90)
+    vertical_text = Alignment(
+        horizontal='center', vertical='center', textRotation=90, wrap_text=True)
     bd = Side(style='thin', color="000000")
     border = Border(left=bd, top=bd, right=bd, bottom=bd)
 
-    general_style = NamedStyle(name='a_style', alignment=center_align, border=border)
+    general_style = NamedStyle(
+        name='a_style', alignment=center_align, border=border)
     general_bold_style = NamedStyle(
-        name='general_bold_style', alignment=center_align, font=Font(b=True))
-    bc_style = NamedStyle(name='bc_style', alignment=vertical_text, border=border)
-    center_no_border = NamedStyle(name='center_no_border', alignment=center_align)
+        name='general_bold_style', alignment=center_align, font=Font(b=True), border=border)
+    bc_style = NamedStyle(
+        name='bc_style', alignment=vertical_text, border=border)
+    center_no_border = NamedStyle(
+        name='center_no_border', alignment=center_align)
 
     obj_dist = District.objects.get(pk=district)
     sheet.title = obj_dist.name
     sheet['A1'] = f'{obj_dist.name} туманидаги мелиоратив кудуклардаги ер ости сувларини жойлашиши хакида '
-    sheet['A2'] = f'МАЪЛУМОТ      {month}  ойи {year} й'
-    sheet.merge_cells('A1:P1')
-    sheet.merge_cells('A2:P2')
+    sheet['A2'] = f'МАЪЛУМОТ {months_dict[month]} ойи {year} й'
+    sheet['J4'] = f'{year - 1} й {months_dict[month]} \n уртача чукурлиги см'
+    sheet.merge_cells('A1:L1')
+    sheet.merge_cells('A2:L2')
+    sheet.merge_cells('J4:J5')
     sheet['A1'].style = center_no_border
     sheet['A2'].style = center_no_border
+    sheet['J4'].style = bc_style
 
     farms = Farm.objects.filter(district=district)
     farm_number = 1
@@ -723,119 +805,133 @@ def report_view(request, district, date):
             wells = Well.objects.filter(farm=farm)
             well_count = len(wells)
 
-            #print(f'A{row_number}')
-            sheet[f'A{row_number}'] = farm_number
-            sheet[f'B{row_number}'] = farm.name
-
-            sheet[f'A{row_number}'].style = general_style
-            sheet[f'B{row_number}'].style = bc_style
-            sheet[f'C{row_number}'].style = bc_style
-
             if well_count > 0:
+
+                sheet[f'A{row_number}'] = farm_number
+                sheet[f'B{row_number}'] = farm.name
+
+                sheet[f'A{row_number}'].style = general_style
+                sheet[f'B{row_number}'].style = bc_style
+                sheet[f'C{row_number}'].style = bc_style
+
                 if wells[0].user is not None:
                     staff = wells[0].user.staff
-                    sheet[f'C{row_number}'] = staff.last_name + staff.first_name
+                    sheet[f'C{row_number}'] = staff.last_name + \
+                        " " + staff.first_name
                 else:
                     sheet[f'C{row_number}'] = "Staff not found"
 
-            sheet.merge_cells(f'A{row_number}:A{row_number + well_count}')
-            sheet.merge_cells(f'B{row_number}:B{row_number + well_count - 1}')
-            sheet.merge_cells(f'C{row_number}:C{row_number + well_count - 1}')
-            sheet.merge_cells(
-                f'B{row_number + well_count}:D{row_number + well_count}')
+                sheet.merge_cells(
+                    f'A{row_number}:A{row_number + well_count + 1}')
+                sheet.merge_cells(
+                    f'B{row_number}:B{row_number + well_count - 1}')
+                sheet.merge_cells(
+                    f'C{row_number}:C{row_number + well_count - 1}')
+                sheet.merge_cells(
+                    f'B{row_number + well_count}:C{row_number + well_count}')
+                sheet.merge_cells(
+                    f'B{row_number + well_count + 1}:C{row_number + well_count + 1}')
 
-            sum_area = 0
-            for well in wells:
-                sum_area += well.area
-                sheet[f'D{row_number}'] = well.area
-                sheet[f'E{row_number}'] = well.number
-                sheet[f'P{row_number}'] = well.label
+                sheet[f'B{row_number + well_count}'] = 'Уртача'
+                sheet[f'B{row_number + well_count + 1}'] = 'Жами'
 
-                ugvs = MusterPumping.objects.filter(
-                    well=well, date__year=year, date__month=month)
-                
-                first_dec = 0
-                first_dec_count = 0
-                
-                second_dec = 0
-                second_dec_count = 0
-
-                third_dec = 0
-                third_dec_count = 0
-
-                bottom = 0
-                bottom_count = 0
-
+                sum_area = 0
                 sum_first_dec = 0
                 sum_second_dec = 0
                 sum_third_dec = 0
+                sum_average_dec = 0
+                sum_last_year = 0
 
-                for ugv in ugvs:
-                    if ugv.date.day <= 10:
-                        first_dec += ugv.ugv_before_pumping
-                        first_dec_count += 1
-                    elif ugv.date.day <= 20:
-                        second_dec += ugv.ugv_before_pumping
-                        second_dec_count += 1
-                    else:
-                        third_dec += ugv.ugv_before_pumping
-                        third_dec_count += 1
+                # actual well count for each situation
+                well_count_first_dec = 0
+                well_count_second_dec = 0
+                well_count_third_dec = 0
+                well_count_mean_dec = 0
+                well_count_last_year = 0
 
-                    bottom += ugv.bottom
-                    bottom_count += 1
-                    
-                if first_dec_count != 0:
-                    first_dec /= first_dec_count
-                if second_dec_count != 0:
-                    second_dec /= second_dec_count
-                if third_dec_count != 0:
-                    third_dec /= third_dec_count
-                if bottom_count > 0:
-                    bottom /= bottom_count
+                for well in wells:
+                    sum_area += well.area
+                    if notZero(well.area):
+                        sheet[f'D{row_number}'] = well.area
+                    if notZero(well.number):
+                        sheet[f'E{row_number}'] = well.number
+                    if notZero(well.label):
+                        sheet[f'L{row_number}'] = well.label
 
-                sum_first_dec += first_dec
-                sum_second_dec += second_dec
-                sum_third_dec += third_dec
+                    first_dec, second_dec, third_dec = get_degrees_by_decades(
+                        well, year, month)
 
-                sheet[f'F{row_number}'] = first_dec
-                sheet[f'G{row_number}'] = second_dec
-                sheet[f'H{row_number}'] = third_dec
-                sheet[f'I{row_number}'] = (first_dec + second_dec + third_dec) / 3
-                sheet[f'O{row_number}'] = bottom
+                    sum_first_dec += first_dec
+                    sum_second_dec += second_dec
+                    sum_third_dec += third_dec
+                    average = notZeroMean(first_dec, second_dec, third_dec)
+                    sum_average_dec += average
 
-                row_number += 1
-            
-            ugv_count = len(ugvs)
+                    if notZero(first_dec):
+                        well_count_first_dec += 1
+                        sheet[f'F{row_number}'] = f'{first_dec:.2f}'
+                    if notZero(second_dec):
+                        well_count_second_dec += 1
+                        sheet[f'G{row_number}'] = f'{second_dec:.2f}'
+                    if notZero(third_dec):
+                        well_count_third_dec += 1
+                        sheet[f'H{row_number}'] = f'{third_dec:.2f}'
+                    if notZero(average):
+                        well_count_mean_dec += 1
+                        sheet[f'I{row_number}'] = f'{average:.2f}'
 
-            if sum_first_dec != 0:
-                sum_first_dec /= ugv_count
-            if sum_second_dec != 0:
-                sum_second_dec /= ugv_count
-            if sum_third_dec != 0:
-                sum_third_dec /= ugv_count
-            
-            sheet[f'F{row_number}'] = sum_first_dec
-            sheet[f'G{row_number}'] = sum_second_dec
-            sheet[f'H{row_number}'] = sum_third_dec
-            
-            sheet[f'F{row_number}'] = first_dec
-            sheet[f'G{row_number}'] = second_dec
-            sheet[f'H{row_number}'] = third_dec
-            sheet[f'I{row_number}'] = (first_dec + second_dec + third_dec) / 3
+                    last_year_degree = notZeroMean(
+                        *get_degrees_by_decades(well, year, month))
+                    sum_last_year += last_year_degree
+                    if notZero(last_year_degree):
+                        well_count_last_year += 1
+                        sheet[f'J{row_number}'] = f'{last_year_degree:.2f}'
 
-            sheet[f'B{row_number}'] = f'{sum_area / well_count:.2f}'
-            sheet[f'E{row_number}'] = well_count
+                    closest_ugv = get_closest_to_date(
+                        MusterPumping, datetime.date(year - 1, month, 1), well)
+                    if closest_ugv is not None:
+                        sheet[f'K{row_number}'] = closest_ugv.bottom
+                    row_number += 1
 
-            sheet[f'B{row_number}'].style = general_bold_style
-            sheet[f'E{row_number}'].style = general_bold_style
+                sheet[f'F{row_number + 1}'] = f'{sum_first_dec:.2f}'
+                sheet[f'G{row_number + 1}'] = f'{sum_second_dec:.2f}'
+                sheet[f'H{row_number + 1}'] = f'{sum_third_dec:.2f}'
+                sheet[f'I{row_number + 1}'] = f'{sum_average_dec:.2f}'
+                sheet[f'J{row_number + 1}'] = f'{sum_last_year:.2f}'
 
-            farm_number += 1
-            row_number += 1
+                if sum_first_dec != 0:
+                    sum_first_dec /= well_count_first_dec
+                if sum_second_dec != 0:
+                    sum_second_dec /= well_count_second_dec
+                if sum_third_dec != 0:
+                    sum_third_dec /= well_count_third_dec
+                if sum_average_dec != 0:
+                    sum_average_dec /= well_count_mean_dec
+                if sum_last_year != 0:
+                    sum_last_year /= well_count_last_year
+
+                sheet[f'F{row_number}'] = f'{sum_first_dec:.2f}'
+                sheet[f'G{row_number}'] = f'{sum_second_dec:.2f}'
+                sheet[f'H{row_number}'] = f'{sum_third_dec:.2f}'
+                sheet[f'I{row_number}'] = f'{sum_average_dec:.2f}'
+                sheet[f'J{row_number}'] = f'{sum_last_year:.2f}'
+                sheet[f'D{row_number + 1}'] = f'{sum_area:.2f}'
+                sheet[f'E{row_number + 1}'] = well_count
+
+                # General styling
+                for i in range(row_number - well_count, row_number):
+                    for letter in ('D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'):
+                        sheet[f'{letter}{i}'].style = general_style
+
+                # styles for ever well
+                for letter in ('B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'):
+                    sheet[f'{letter}{row_number}'].style = general_bold_style
+                    sheet[f'{letter}{row_number + 1}'].style = general_bold_style
+                farm_number += 1
+                row_number += 2
     except:
         traceback.print_exc()
-    for i in range(7, row_number):
-        for letter in ('D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P'):
-            sheet[f'{letter}{i}'].style = general_style
+        raise
     #wb.save('D:/a6_res.xlsx')
     #wb.close()
 
@@ -845,4 +941,200 @@ def report_view(request, district, date):
     response['Content-Disposition'] = 'attachment; filename=myexport.xlsx'
     return response
 
-    #return HttpResponse("", 200)
+@api_view(['GET'])
+def report_soil_analysis(request, district, date):
+
+
+    months_dict = {
+        1: 'январь',
+        2: 'февраль',
+        3: 'март',
+        4: 'апрель',
+        5: 'май',
+        6: 'июнь',
+        7: 'июль',
+        8: 'августь',
+        9: 'сентябрь',
+        10: 'откябрь',
+        11: 'ноябрь',
+        12: 'декабрь',
+    }
+
+    year, month, _ = date.split('-')
+    year = int(year)
+    month = int(month)
+    wb = load_workbook(os.path.join(
+        settings.BASE_DIR, 'reports', 'report-soil-analysis.xlsx'))
+    sheet = wb.active
+
+    center_align = Alignment(horizontal='center', vertical='center')
+    vertical_text = Alignment(
+        horizontal='center', vertical='center', textRotation=90, wrap_text=True)
+    bd = Side(style='thin', color="000000")
+    border = Border(left=bd, top=bd, right=bd, bottom=bd)
+
+    general_style = NamedStyle(
+        name='a_style', alignment=center_align, border=border)
+    general_bold_style = NamedStyle(
+        name='general_bold_style', alignment=center_align, font=Font(b=True), border=border)
+    bc_style = NamedStyle(
+        name='bc_style', alignment=vertical_text, border=border)
+    center_no_border = NamedStyle(
+        name='center_no_border', alignment=center_align)
+
+    obj_dist = District.objects.get(pk=district)
+    sheet.title = obj_dist.name
+    sheet['A1'] = f'{obj_dist.name} туманидаги мелиоратив кудуклардаги ер ости сувларини жойлашиши хакида '
+    sheet['A2'] = f'МАЪЛУМОТ {months_dict[month]} ойи {year} й'
+    sheet['J4'] = f'{year - 1} й {months_dict[month]} \n уртача чукурлиги см'
+    sheet.merge_cells('A1:L1')
+    sheet.merge_cells('A2:L2')
+    sheet.merge_cells('J4:J5')
+    sheet['A1'].style = center_no_border
+    sheet['A2'].style = center_no_border
+    sheet['J4'].style = bc_style
+
+    farms = Farm.objects.filter(district=district)
+    farm_number = 1
+    row_number = 7
+    try:
+        for farm in farms:
+
+            wells = Well.objects.filter(farm=farm)
+            well_count = len(wells)
+
+            if well_count > 0:
+
+                sheet[f'A{row_number}'] = farm_number
+                sheet[f'B{row_number}'] = farm.name
+
+                sheet[f'A{row_number}'].style = general_style
+                sheet[f'B{row_number}'].style = bc_style
+                sheet[f'C{row_number}'].style = bc_style
+
+                if wells[0].user is not None:
+                    staff = wells[0].user.staff
+                    sheet[f'C{row_number}'] = staff.last_name + \
+                        " " + staff.first_name
+                else:
+                    sheet[f'C{row_number}'] = "Staff not found"
+
+                sheet.merge_cells(
+                    f'A{row_number}:A{row_number + well_count + 1}')
+                sheet.merge_cells(
+                    f'B{row_number}:B{row_number + well_count - 1}')
+                sheet.merge_cells(
+                    f'C{row_number}:C{row_number + well_count - 1}')
+                sheet.merge_cells(
+                    f'B{row_number + well_count}:C{row_number + well_count}')
+                sheet.merge_cells(
+                    f'B{row_number + well_count + 1}:C{row_number + well_count + 1}')
+
+                sheet[f'B{row_number + well_count}'] = 'Уртача'
+                sheet[f'B{row_number + well_count + 1}'] = 'Жами'
+
+                sum_area = 0
+                sum_first_dec = 0
+                sum_second_dec = 0
+                sum_third_dec = 0
+                sum_average_dec = 0
+                sum_last_year = 0
+
+                # actual well count for each situation
+                well_count_first_dec = 0
+                well_count_second_dec = 0
+                well_count_third_dec = 0
+                well_count_mean_dec = 0
+                well_count_last_year = 0
+
+                for well in wells:
+                    sum_area += well.area
+                    if notZero(well.area):
+                        sheet[f'D{row_number}'] = well.area
+                    if notZero(well.number):
+                        sheet[f'E{row_number}'] = well.number
+                    if notZero(well.label):
+                        sheet[f'L{row_number}'] = well.label
+
+                    first_dec, second_dec, third_dec = get_degrees_by_decades(
+                        well, year, month)
+
+                    sum_first_dec += first_dec
+                    sum_second_dec += second_dec
+                    sum_third_dec += third_dec
+                    average = notZeroMean(first_dec, second_dec, third_dec)
+                    sum_average_dec += average
+
+                    if notZero(first_dec):
+                        well_count_first_dec += 1
+                        sheet[f'F{row_number}'] = f'{first_dec:.2f}'
+                    if notZero(second_dec):
+                        well_count_second_dec += 1
+                        sheet[f'G{row_number}'] = f'{second_dec:.2f}'
+                    if notZero(third_dec):
+                        well_count_third_dec += 1
+                        sheet[f'H{row_number}'] = f'{third_dec:.2f}'
+                    if notZero(average):
+                        well_count_mean_dec += 1
+                        sheet[f'I{row_number}'] = f'{average:.2f}'
+
+                    last_year_degree = notZeroMean(
+                        *get_degrees_by_decades(well, year, month))
+                    sum_last_year += last_year_degree
+                    if notZero(last_year_degree):
+                        well_count_last_year += 1
+                        sheet[f'J{row_number}'] = f'{last_year_degree:.2f}'
+
+                    closest_ugv = get_closest_to_date(
+                        MusterPumping, datetime.date(year - 1, month, 1), well)
+                    if closest_ugv is not None:
+                        sheet[f'K{row_number}'] = closest_ugv.bottom
+                    row_number += 1
+
+                sheet[f'F{row_number + 1}'] = f'{sum_first_dec:.2f}'
+                sheet[f'G{row_number + 1}'] = f'{sum_second_dec:.2f}'
+                sheet[f'H{row_number + 1}'] = f'{sum_third_dec:.2f}'
+                sheet[f'I{row_number + 1}'] = f'{sum_average_dec:.2f}'
+                sheet[f'J{row_number + 1}'] = f'{sum_last_year:.2f}'
+
+                if sum_first_dec != 0:
+                    sum_first_dec /= well_count_first_dec
+                if sum_second_dec != 0:
+                    sum_second_dec /= well_count_second_dec
+                if sum_third_dec != 0:
+                    sum_third_dec /= well_count_third_dec
+                if sum_average_dec != 0:
+                    sum_average_dec /= well_count_mean_dec
+                if sum_last_year != 0:
+                    sum_last_year /= well_count_last_year
+
+                sheet[f'F{row_number}'] = f'{sum_first_dec:.2f}'
+                sheet[f'G{row_number}'] = f'{sum_second_dec:.2f}'
+                sheet[f'H{row_number}'] = f'{sum_third_dec:.2f}'
+                sheet[f'I{row_number}'] = f'{sum_average_dec:.2f}'
+                sheet[f'J{row_number}'] = f'{sum_last_year:.2f}'
+                sheet[f'D{row_number + 1}'] = f'{sum_area:.2f}'
+                sheet[f'E{row_number + 1}'] = well_count
+
+                # General styling
+                for i in range(row_number - well_count, row_number):
+                    for letter in ('D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'):
+                        sheet[f'{letter}{i}'].style = general_style
+
+                # styles for ever well
+                for letter in ('B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'):
+                    sheet[f'{letter}{row_number}'].style = general_bold_style
+                    sheet[f'{letter}{row_number + 1}'].style = general_bold_style
+                farm_number += 1
+                row_number += 2
+    except:
+        traceback.print_exc()
+        raise
+    #wb.save('D:/a6_res.xlsx')
+    #wb.close()
+
+    response = HttpResponse(content=save_virtual_workbook(
+        wb), content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+
+    response['Content-Disposition'] = 'attachment; filename=myexport.xlsx'
+    return response
