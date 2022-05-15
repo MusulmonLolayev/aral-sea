@@ -88,6 +88,14 @@
           :rules="[() => required('label')]"
         />
       </div>
+      <div class="col-5">
+        <q-input
+          v-model="well.imei"
+          :label="$t('imei').format_letter()"
+          style="margin-right: 30px"
+          :rules="[(value) => checkIMEI(value) ]"
+        />
+      </div>
       <div class="col-7">
         {{ $t("material").format_letter() }}: &ensp;
         <q-radio v-model="well.material" :val="true" :label="$t('polythene').format_letter()" />
@@ -119,6 +127,12 @@ export default {
       let value = this.well[name];
       if (!value) return this.$t("required").format_letter();
       if (value < 0) return this.$t("not_higher_zero").format_letter();
+      return true;
+    },
+    checkIMEI(value){
+      if (value != '' && ! value.match(/^([0-9]){15}/)){
+        return this.$t('the_imei_15_digit')
+      }
       return true;
     },
     hasError() {

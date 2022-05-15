@@ -48,7 +48,8 @@ module.exports = function (/* ctx */) {
     build: {
       vueRouterMode: 'hash', // available values: 'hash', 'history'
 
-      publicPath: '',
+      //publicPath: '',
+      publicPath: 'static',
 
       // transpile: false,
 
@@ -127,9 +128,9 @@ module.exports = function (/* ctx */) {
       workboxPluginMode: 'GenerateSW', // 'GenerateSW' or 'InjectManifest'
       workboxOptions: {}, // only for GenerateSW
       manifest: {
-        name: 'aral-sea',
-        short_name: 'aral-sea system',
-        description: 'The monitoring system of Aral sea',
+        name: 'tuberculosissytem',
+        short_name: 'tuberculosissytem',
+        description: 'Tuberculosis diagnostic system',
         display: 'standalone',
         orientation: 'portrait',
         background_color: '#ffffff',

@@ -154,6 +154,10 @@ export default {
           label: this.$t("reduced").format_letter(),
           field: "reduced",
         },
+        {
+          label: this.$t("water_salinity").format_letter(),
+          field: "water_salinity",
+        },
         { label: this.$t("date").format_letter(), field: "date" },
       ];
 

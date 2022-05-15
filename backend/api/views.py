@@ -4,6 +4,7 @@ from rest_framework.decorators import api_view, authentication_classes, permissi
 from rest_framework.response import Response
 from rest_framework.authentication import BasicAuthentication, TokenAuthentication
 from rest_framework.permissions import IsAuthenticated, DjangoModelPermissions
+from rest_framework.pagination import PageNumberPagination
 
 from main.models import *
 
@@ -117,6 +118,8 @@ class MusterPumpingListView(ListAPIView):
             well_id = int(self.kwargs['well_id'])
             return MusterPumping.objects.filter(well=well_id)
         return MusterPumping.objects.filter()
+
+#class YieldSizeViewSet
 
 @api_view(['GET'])
 def farm_request(request, district_id=0):
@@ -254,7 +257,6 @@ def muster_pumping_request(request):
 def district_request(request):
     if request.method == "GET":
         return Response(DistrictSerializer(District.objects.all(), many=True).data, status=200)
-
 
 @api_view(['GET'])
 def get_user_district(request):
@@ -508,6 +510,33 @@ def ugv_from_weighter(request):
     print(request.data)
     print(request)
     return Response("Ok", status=200)
+
+
+class StandardResultsSetPagination(PageNumberPagination):
+    page_size = 50
+    page_size_query_param = 'page_size'
+    max_page_size = 1000
+
+    def get_paginated_response(self, data):
+        return Response({
+            'links': {
+               'next': self.get_next_link(),
+               'previous': self.get_previous_link()
+            },
+            'count': self.page.paginator.count,
+            'pagesCount': self.page.paginator.num_pages,
+            'results': data
+        })
+
+class MustorSoilView(ListAPIView):
+    #queryset = MusterSoil.objects.order_by('id').all()
+    #queryset = MusterSoil.objects.all()
+    serializer_class = MusterSoilSerializer
+    pagination_class = StandardResultsSetPagination
+
+    def get_queryset(self):
+        district = self.request.query_params.get('district')
+        return MusterSoil.objects.filter(well__farm__district=district).order_by('id').all()
 
 
 @api_view(['GET', 'POST', 'PUT', 'DELETE'])
@@ -943,8 +972,6 @@ def report_6a(request, district, date):
 
 @api_view(['GET'])
 def report_soil_analysis(request, district, date):
-
-
     months_dict = {
         1: 'январь',
         2: 'февраль',
@@ -967,7 +994,7 @@ def report_soil_analysis(request, district, date):
         settings.BASE_DIR, 'reports', 'report-soil-analysis.xlsx'))
     sheet = wb.active
 
-    center_align = Alignment(horizontal='center', vertical='center')
+    center_align = Alignment(horizontal='center', vertical='center', wrap_text=True)
     vertical_text = Alignment(
         horizontal='center', vertical='center', textRotation=90, wrap_text=True)
     bd = Side(style='thin', color="000000")
@@ -975,8 +1002,7 @@ def report_soil_analysis(request, district, date):
 
     general_style = NamedStyle(
         name='a_style', alignment=center_align, border=border)
-    general_bold_style = NamedStyle(
-        name='general_bold_style', alignment=center_align, font=Font(b=True), border=border)
+    
     bc_style = NamedStyle(
         name='bc_style', alignment=vertical_text, border=border)
     center_no_border = NamedStyle(
@@ -984,152 +1010,89 @@ def report_soil_analysis(request, district, date):
 
     obj_dist = District.objects.get(pk=district)
     sheet.title = obj_dist.name
-    sheet['A1'] = f'{obj_dist.name} туманидаги мелиоратив кудуклардаги ер ости сувларини жойлашиши хакида '
-    sheet['A2'] = f'МАЪЛУМОТ {months_dict[month]} ойи {year} й'
-    sheet['J4'] = f'{year - 1} й {months_dict[month]} \n уртача чукурлиги см'
-    sheet.merge_cells('A1:L1')
-    sheet.merge_cells('A2:L2')
-    sheet.merge_cells('J4:J5')
+    sheet['A1'] = f'Отчет'
+    sheet['A2'] = f'Результатов хим-анализов почвагрунтов по солевому опробованию за {months_dict[month]} месяц {year} года из хозяйств {obj_dist.name} района'
+    sheet.merge_cells('A1:K1')
+    sheet.merge_cells('A2:K2')
     sheet['A1'].style = center_no_border
     sheet['A2'].style = center_no_border
-    sheet['J4'].style = bc_style
 
     farms = Farm.objects.filter(district=district)
     farm_number = 1
-    row_number = 7
+    row_number = 9
     try:
         for farm in farms:
 
             wells = Well.objects.filter(farm=farm)
-            well_count = len(wells)
+            merging_row = row_number
 
-            if well_count > 0:
+            print('row_number', row_number)
 
-                sheet[f'A{row_number}'] = farm_number
-                sheet[f'B{row_number}'] = farm.name
+            sheet[f'A{row_number}'] = farm_number
+            sheet[f'B{row_number}'] = farm.name
 
-                sheet[f'A{row_number}'].style = general_style
-                sheet[f'B{row_number}'].style = bc_style
-                sheet[f'C{row_number}'].style = bc_style
+            sheet[f'A{row_number}'].style = general_style
+            sheet[f'B{row_number}'].style = bc_style
 
-                if wells[0].user is not None:
-                    staff = wells[0].user.staff
-                    sheet[f'C{row_number}'] = staff.last_name + \
-                        " " + staff.first_name
-                else:
-                    sheet[f'C{row_number}'] = "Staff not found"
+                
+            for well in wells:
+                sheet[f'C{row_number}'] = well.number
+                mss = MusterSoil.objects.filter(well=well)
 
-                sheet.merge_cells(
-                    f'A{row_number}:A{row_number + well_count + 1}')
-                sheet.merge_cells(
-                    f'B{row_number}:B{row_number + well_count - 1}')
-                sheet.merge_cells(
-                    f'C{row_number}:C{row_number + well_count - 1}')
-                sheet.merge_cells(
-                    f'B{row_number + well_count}:C{row_number + well_count}')
-                sheet.merge_cells(
-                    f'B{row_number + well_count + 1}:C{row_number + well_count + 1}')
+                for ms in mss:
+                    sheet[f'D{row_number}'] = ms.pit_no
+                    sheet[f'N{row_number}'] = ms.pit_no
 
-                sheet[f'B{row_number + well_count}'] = 'Уртача'
-                sheet[f'B{row_number + well_count + 1}'] = 'Жами'
+                    if hasattr(ms, 'analysissoil'):
+                        analysis = ms.analysissoil
+                        sheet[f'E{row_number}'] = analysis.electric_wire
+                        sheet[f'O{row_number}'] = analysis.electric_wire
 
-                sum_area = 0
-                sum_first_dec = 0
-                sum_second_dec = 0
-                sum_third_dec = 0
-                sum_average_dec = 0
-                sum_last_year = 0
+                        # if the chemical analysis was done
+                        if analysis.hco3 != 0:
+                            sheet[f'F{row_number}'] = analysis.hco3 * 0.012
+                            sheet[f'G{row_number}'] = analysis.cl * 0.099
+                            sheet[f'H{row_number}'] = analysis.so4 * 0.82
+                            sheet[f'I{row_number}'] = analysis.ca * 0.05
+                            sheet[f'J{row_number}'] = analysis.mg * 0.03
 
-                # actual well count for each situation
-                well_count_first_dec = 0
-                well_count_second_dec = 0
-                well_count_third_dec = 0
-                well_count_mean_dec = 0
-                well_count_last_year = 0
+                            sheet[f'P{row_number}'] = analysis.hco3
+                            sheet[f'Q{row_number}'] = analysis.cl
+                            sheet[f'R{row_number}'] = analysis.so4
+                            sheet[f'S{row_number}'] = analysis.ca
+                            sheet[f'T{row_number}'] = analysis.mg
 
-                for well in wells:
-                    sum_area += well.area
-                    if notZero(well.area):
-                        sheet[f'D{row_number}'] = well.area
-                    if notZero(well.number):
-                        sheet[f'E{row_number}'] = well.number
-                    if notZero(well.label):
-                        sheet[f'L{row_number}'] = well.label
+                            sheet[f'F{row_number + 1}'] = analysis.hco3 * 0.197
+                            sheet[f'G{row_number + 1}'] = analysis.cl * 2.792
+                            sheet[f'H{row_number + 1}'] = analysis.so4 * 0.82
+                            sheet[f'I{row_number + 1}'] = analysis.ca * 2.494
+                            sheet[f'J{row_number + 1}'] = analysis.mg * 2.467
 
-                    first_dec, second_dec, third_dec = get_degrees_by_decades(
-                        well, year, month)
+                            sheet[f'J{row_number + 1}'] = analysis.hco3 * 0.197 + analysis.cl * 2.792 + analysis.so4 * 0.82 - analysis.ca * 2.494 - analysis.mg * 2.467
 
-                    sum_first_dec += first_dec
-                    sum_second_dec += second_dec
-                    sum_third_dec += third_dec
-                    average = notZeroMean(first_dec, second_dec, third_dec)
-                    sum_average_dec += average
+                            sheet[f'J{row_number}'] = 0.023 * (analysis.hco3 * 0.197 + analysis.cl * 2.792 + analysis.so4 * 0.82 - analysis.ca * 2.494 - analysis.mg * 2.467)
 
-                    if notZero(first_dec):
-                        well_count_first_dec += 1
-                        sheet[f'F{row_number}'] = f'{first_dec:.2f}'
-                    if notZero(second_dec):
-                        well_count_second_dec += 1
-                        sheet[f'G{row_number}'] = f'{second_dec:.2f}'
-                    if notZero(third_dec):
-                        well_count_third_dec += 1
-                        sheet[f'H{row_number}'] = f'{third_dec:.2f}'
-                    if notZero(average):
-                        well_count_mean_dec += 1
-                        sheet[f'I{row_number}'] = f'{average:.2f}'
-
-                    last_year_degree = notZeroMean(
-                        *get_degrees_by_decades(well, year, month))
-                    sum_last_year += last_year_degree
-                    if notZero(last_year_degree):
-                        well_count_last_year += 1
-                        sheet[f'J{row_number}'] = f'{last_year_degree:.2f}'
-
-                    closest_ugv = get_closest_to_date(
-                        MusterPumping, datetime.date(year - 1, month, 1), well)
-                    if closest_ugv is not None:
-                        sheet[f'K{row_number}'] = closest_ugv.bottom
+                            row_number += 1
                     row_number += 1
 
-                sheet[f'F{row_number + 1}'] = f'{sum_first_dec:.2f}'
-                sheet[f'G{row_number + 1}'] = f'{sum_second_dec:.2f}'
-                sheet[f'H{row_number + 1}'] = f'{sum_third_dec:.2f}'
-                sheet[f'I{row_number + 1}'] = f'{sum_average_dec:.2f}'
-                sheet[f'J{row_number + 1}'] = f'{sum_last_year:.2f}'
-
-                if sum_first_dec != 0:
-                    sum_first_dec /= well_count_first_dec
-                if sum_second_dec != 0:
-                    sum_second_dec /= well_count_second_dec
-                if sum_third_dec != 0:
-                    sum_third_dec /= well_count_third_dec
-                if sum_average_dec != 0:
-                    sum_average_dec /= well_count_mean_dec
-                if sum_last_year != 0:
-                    sum_last_year /= well_count_last_year
-
-                sheet[f'F{row_number}'] = f'{sum_first_dec:.2f}'
-                sheet[f'G{row_number}'] = f'{sum_second_dec:.2f}'
-                sheet[f'H{row_number}'] = f'{sum_third_dec:.2f}'
-                sheet[f'I{row_number}'] = f'{sum_average_dec:.2f}'
-                sheet[f'J{row_number}'] = f'{sum_last_year:.2f}'
-                sheet[f'D{row_number + 1}'] = f'{sum_area:.2f}'
-                sheet[f'E{row_number + 1}'] = well_count
+                row_number += 1
 
                 # General styling
-                for i in range(row_number - well_count, row_number):
-                    for letter in ('D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'):
+                for i in range(merging_row, row_number):
+                    for letter in ('C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K'):
+                        sheet[f'{letter}{i}'].style = general_style
+                    
+                for i in range(merging_row, row_number):
+                    for letter in ('N', 'O', 'P', 'Q', 'R', 'S', 'T'):
                         sheet[f'{letter}{i}'].style = general_style
 
-                # styles for ever well
-                for letter in ('B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'):
-                    sheet[f'{letter}{row_number}'].style = general_bold_style
-                    sheet[f'{letter}{row_number + 1}'].style = general_bold_style
-                farm_number += 1
-                row_number += 2
+            farm_number += 1
+            sheet.merge_cells(f'A{merging_row}:A{row_number - 1}')
+            sheet.merge_cells(f'B{merging_row}:B{row_number - 1}')
+
     except:
         traceback.print_exc()
-        raise
+        #raise
     #wb.save('D:/a6_res.xlsx')
     #wb.close()
 
@@ -1138,3 +1101,151 @@ def report_soil_analysis(request, district, date):
 
     response['Content-Disposition'] = 'attachment; filename=myexport.xlsx'
     return response
+
+@api_view(['POST'])
+def get_wells(request):
+    return Response(WellSerializer(Well.objects.filter(pk__in=request.data['ids']), many=True).data, status=200)
+
+@api_view(['POST'])
+def get_farms(request):
+    return Response(FarmSerializer(Farm.objects.filter(pk__in=request.data['ids']), many=True).data, status=200)
+
+
+@api_view(['POST', 'DELETE', 'PUT', 'GET'])
+def yield_request(request, id=0):
+    try:
+        if request.method == 'GET':
+            if id != 0:
+                ys = YieldSize.objects.get(pk=id)
+                return Response(YieldSizeSerializer(ys).data, status=200)
+            else:
+                return Response(YieldSizeSerializer(YieldSize.objects.order_by('id').all(), many=True).data, status=200)
+        # Create object
+        if request.method == 'POST':
+            serializer = YieldSizeSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data.get('id'), status=201)
+            else:
+                return Response(serializer.errors, status=406)
+
+        # find suitable instance
+        print(request.data)
+        try:
+            instance = YieldSize.objects.get(id=request.data.get('id'))
+        except:
+            return Response(status=404)
+
+        # Update object
+        if request.method == 'PUT':
+            serializer = YieldSizeSerializer(instance, data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(status=200)
+            else:
+                return Response(serializer.errors, status=406)
+        else:
+            instance.delete()
+            return Response('Deleted', status=200)
+    except:
+        traceback.print_exc()
+        return Response(status=500)
+
+
+@api_view(['POST', 'DELETE', 'PUT', 'GET'])
+def water_request(request, id=0):
+    try:
+        if request.method == 'GET':
+            if id != 0:
+                ys = WaterSize.objects.get(pk=id)
+                return Response(WaterSize(ys).data, status=200)
+            else:
+                return Response(WaterSizeSerializer(WaterSize.objects.all(), many=True).data, status=200)
+        # Create object
+        if request.method == 'POST':
+            serializer = WaterSizeSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data.get('id'), status=201)
+            else:
+                return Response(serializer.errors, status=406)
+
+        # find suitable instance
+        try:
+            instance = WaterSize.objects.get(id=request.data.get('id'))
+        except:
+            return Response(status=404)
+
+        # Update object
+        if request.method == 'PUT':
+            serializer = WaterSizeSerializer(instance, data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(status=200)
+            else:
+                return Response(serializer.errors, status=406)
+        else:
+            instance.delete()
+            return Response('Deleted', status=200)
+    except:
+        traceback.print_exc()
+        return Response(status=500)
+
+
+@api_view(['POST', 'DELETE', 'PUT', 'GET'])
+def water_norm_request(request, id=0):
+    try:
+        if request.method == 'GET':
+            if id != 0:
+                ys = WaterNorm.objects.get(pk=id)
+                return Response(WaterNorm(ys).data, status=200)
+            else:
+                return Response(WaterNormSerializer(WaterNorm.objects.all(), many=True).data, status=200)
+        # Create object
+        if request.method == 'POST':
+            serializer = WaterNormSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data.get('id'), status=201)
+            else:
+                return Response(serializer.errors, status=406)
+
+        # find suitable instance
+        try:
+            instance = WaterNorm.objects.get(id=request.data.get('id'))
+        except:
+            return Response(status=404)
+
+        # Update object
+        if request.method == 'PUT':
+            serializer = WaterNormSerializer(instance, data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(status=200)
+            else:
+                return Response(serializer.errors, status=406)
+        else:
+            instance.delete()
+            return Response('Deleted', status=200)
+    except:
+        traceback.print_exc()
+        return Response(status=500)
+
+@api_view(['GET'])
+def well_tool_data(request, imei):
+    last_tool_data = WellToolData.objects.filter(imei=imei).last()
+    if last_tool_data:
+        return Response(WellToolDataSerializer(last_tool_data).data, status=200)
+    else:
+        return Response('Not found', status=200)
+
+
+#@api_view(['GET'])
+def json_query(request):
+    kargs = {}
+    for key in request.GET:
+        vals = request.GET.get(key)
+        if len(vals) > 0:
+            kargs[key] = vals[0]
+    #return Response(WellSerializer(Well.objects.filter(**kargs), many=True), status=200)
+    return HttpResponse(str(kargs), status=200)

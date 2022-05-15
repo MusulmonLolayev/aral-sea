@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, re_path
 
 from rest_framework.urlpatterns import format_suffix_patterns
 
@@ -69,6 +69,7 @@ urlpatterns = [
 
     path('ugv_weighter', ugv_from_weighter),
 
+    re_path('^muster_soil_request/pagination/$', MustorSoilView.as_view()),
     path('muster_soil_request/<int:id>', muster_soil_request),
     path('muster_soil_request', muster_soil_request),
 
@@ -90,6 +91,22 @@ urlpatterns = [
     path('analysis_soil_request/<int:mustersoilid>', analysis_soil_request),
     path('report-6a/<int:district>/<str:date>', report_6a),
     path('report-soil-analysis/<int:district>/<str:date>', report_soil_analysis),
+
+    re_path('^json_query/$', json_query),
+
+    path('get_wells_by_ids', get_wells),
+    path('get_farms_by_ids', get_farms),
+
+    path('yield_request/<int:id>', yield_request),
+    path('yield_request', yield_request),
+
+    path('water_request/<int:id>', water_request),
+    path('water_request', water_request),
+
+    path('water_norm_request/<int:id>', water_norm_request),
+    path('water_norm_request', water_norm_request),
+
+    path('well_tool_data/<str:imei>', well_tool_data)
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

@@ -99,6 +99,14 @@
       </div>
       <div class="col-5">
         <q-input
+          v-model="muster_pumping.water_salinity"
+          :label="$t('water_salinity').format_letter()"
+          type="number"
+          style="margin-right: 30px"
+        />
+      </div>
+      <div class="col-5">
+        <q-input
           v-model="muster_pumping.date"
           :label="$t('date').format_letter()"
           type="date"

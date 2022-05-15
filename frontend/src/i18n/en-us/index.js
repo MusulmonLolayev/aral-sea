@@ -131,6 +131,7 @@ export default {
   speed_water: "speed of water",
   elevated: "elevated",
   reduced: "reduced",
+  water_salinity: "water salinity",
 
   // Modles names: Well
   my_wells: "wells",
@@ -150,6 +151,13 @@ export default {
   not_higher_zero: "value must be higher than zero",
   add_muster: "add muster",
   select_farm: "select farm",
+  imei: "IMEI",
+  the_imei_15_digit: "IMEI должен состоять из 15 цифр",
+  the_last_info: "the last information of the well status",
+  date_time: "the date and time of last data",
+  well_water_degree: "the water degree in well",
+  well_water_salinity: "the water salinity in well",
+  well_water_temperature: "the water temperature in well",
 
   // Models names: farms:
   farms: "farms",

@@ -31,7 +31,8 @@ ALLOWED_HOSTS = ['localhost', '127.0.0.1', '192.168.1.101']
 # **Dont forget to add your client's address to the CORS whitelist. This will make sure the server accepts request from
 # the specified source only
 CORS_ORIGIN_WHITELIST = [
-    'http://localhost:8000'
+    'http://localhost:8000',
+    'http://127.0.0.1'
 ]
 
 # allow all requests containing any of the default headers(as in django docs) or content-type header

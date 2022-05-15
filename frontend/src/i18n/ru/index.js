@@ -131,6 +131,7 @@ export default {
   speed_water: "скорость воды",
   elevated: "возвышенный",
   reduced: "уменьшенный",
+  water_salinity: "соленость воды",
 
   // Modles names: Well
   my_wells: "колодцы",
@@ -150,6 +151,13 @@ export default {
   not_higher_zero: "значение должно быть больше нуля",
   add_muster: "добавить сбор",
   select_farm: "выберите ферму",
+  imei: "IMEI",
+  the_imei_15_digit: "the IMEI must be 15 digits",
+  the_last_info: "последняя информация о состоянии скважины",
+  date_time: "дата и время последних данных",
+  well_water_degree: "уровень воды в колодце",
+  well_water_salinity: "соленость воды в колодце",
+  well_water_temperature: "температура воды в колодце",
 
   // Models names: farms:
   farms: "фермы",

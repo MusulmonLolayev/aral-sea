@@ -109,3 +109,24 @@ class AnalysisSoilSerializer(serializers.ModelSerializer):
     class Meta:
         model = AnalysisSoil
         fields = '__all__'
+    
+class YieldSizeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = YieldSize
+        fields = '__all__'
+
+class WaterSizeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = WaterSize
+        fields = '__all__'
+
+class WaterNormSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = WaterNorm
+        fields = '__all__'
+
+
+class WellToolDataSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = WellToolData
+        fields = '__all__'

@@ -31,25 +31,24 @@ Date.prototype.addMins = function (m) {
 
 let helper = {
   lang(name) {
-    return i18n.t(name)
+    return i18n.t(name);
   },
 
   message_types: {
-    success: 'success',
-    error: 'error'
+    success: "success",
+    error: "error"
   },
-
 
   rules: {
     select: [val => !!val],
-    number: [val => !!val],
+    number: [val => !!val]
   },
 
   ToYesNO(value) {
-    return value == true ? this.lang('yes') : this.lang('no');
+    return value == true ? this.lang("yes") : this.lang("no");
   },
   ToBoolFromYesNo(value) {
-    return value == this.lang('yes');
+    return value == this.lang("yes");
   },
   ToPlusMinus(value) {
     return value == true ? "+" : "-";
@@ -59,66 +58,84 @@ let helper = {
   },
   GetCurrentDate() {
     var today = new Date();
-    var dd = String(today.getDate()).padStart(2, '0');
-    var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+    var dd = String(today.getDate()).padStart(2, "0");
+    var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
     var yyyy = today.getFullYear();
 
-    today = yyyy + '-' + mm + '-' + dd;
-    return today
+    today = yyyy + "-" + mm + "-" + dd;
+    return today;
   },
 
   DateTimeToDate(date) {
-    var dd = String(date.getDate()).padStart(2, '0');
-    var mm = String(date.getMonth() + 1).padStart(2, '0'); //January is 0!
+    var dd = String(date.getDate()).padStart(2, "0");
+    var mm = String(date.getMonth() + 1).padStart(2, "0"); //January is 0!
     var yyyy = date.getFullYear();
 
-    date = yyyy + '-' + mm + '-' + dd;
-    return date
+    date = yyyy + "-" + mm + "-" + dd;
+    return date;
   },
 
   async saveInstance(instance, url) {
     try {
       if (instance.id == 0) {
-        let response = await Api
-          .post(url, instance)
-        instance.id = response.data
-        return true
+        let response = await Api.post(url, instance);
+        instance.id = response.data;
+        return true;
       } else {
-        await Api
-          .put(url, instance)
-        return true
+        await Api.put(url, instance);
+        return true;
       }
-    }
-    catch (e) {
-      return e
+    } catch (e) {
+      return e;
     }
   },
 
   async deleteInstance(instance, url) {
     try {
-      await Api.delete(url, { data: { 'id': instance.id } })
-      return true
-    }
-    catch (e) {
-      return e
+      await Api.delete(url, { data: { id: instance.id } });
+      return true;
+    } catch (e) {
+      return e;
     }
   },
 
-  async get_farm(farm_id){
-    let response = await Api.get("farm_request/" + farm_id)
-    return response.data[0]
+  async get_farm(farm_id) {
+    let response = await Api.get("farm_request/" + farm_id);
+    return response.data[0];
   },
 
-  async get_well(well_id){
-    let response = await Api.get("well_request/" + well_id)
-    return response.data
+  async get_well(well_id) {
+    let response = await Api.get("well_request/" + well_id);
+    return response.data;
+  },
+
+  async get_wells(ids) {
+    let response = await Api.post("get_wells_by_ids", {
+      ids: ids
+    });
+    return response.data;
+  },
+
+  async get_farms(ids) {
+    let response = await Api.post("get_farms_by_ids", {
+      ids: ids
+    });
+    return response.data;
   },
 
   getSelectedString(numberOfRows) {
     return numberOfRows + " " + i18n.t("selected");
   },
   get_pagination_label(firstRowIndex, endRowIndex, totalRowsNumber) {
-    return firstRowIndex + "-" + endRowIndex + " " + i18n.t("of") + " " + totalRowsNumber;
+    return (
+      firstRowIndex +
+      "-" +
+      endRowIndex +
+      " " +
+      i18n.t("of") +
+      " " +
+      totalRowsNumber
+    );
   },
 
   DealSavingRespone(response) {
@@ -127,20 +144,20 @@ let helper = {
         message: this.lang("edited"),
         color: "blue",
         icon: "success",
-        actions: [{ label: this.lang("close"), color: "white" }],
+        actions: [{ label: this.lang("close"), color: "white" }]
       });
     } else {
       Notify.create({
         message: this.lang("unedited"),
         color: "red",
         icon: "error",
-        actions: [{ label: this.lang("close"), color: "white" }],
+        actions: [{ label: this.lang("close"), color: "white" }]
       });
     }
   },
 
   muster_pumping() {
-    var d = new Date()
+    var d = new Date();
     let defaultItem = {
       id: 0,
       count_gall: 0,
@@ -151,18 +168,19 @@ let helper = {
       speed_water: 0,
       elevated: 0,
       reduced: 0,
+      water_salinity: 0,
       date: helper.GetCurrentDate()
-    }
-    defaultItem.starting_pumping = d.toTimeString().substring(0, 8)
-    d.addMins(10)
-    defaultItem.finishing_pumping = d.toTimeString().substring(0, 8)
-    return defaultItem
+    };
+    defaultItem.starting_pumping = d.toTimeString().substring(0, 8);
+    d.addMins(10);
+    defaultItem.finishing_pumping = d.toTimeString().substring(0, 8);
+    return defaultItem;
   },
 
   well() {
     let defaultItem = {
       id: 0,
-      number: '1',
+      number: "1",
       x: 0,
       y: 0,
       built_year: 1980,
@@ -172,11 +190,12 @@ let helper = {
       material: true,
       area: 0,
       label: 0,
-    }
-    return defaultItem
+      imei: "",
+    };
+    return defaultItem;
   },
 
-  muster_soil(){
+  muster_soil() {
     return {
       id: 0,
       well: null,
@@ -187,17 +206,17 @@ let helper = {
       date: helper.GetCurrentDate(),
       crop_type: null,
       location_x: null,
-      location_y: null,
-    }
+      location_y: null
+    };
   },
 
-  soil_deep(){
+  soil_deep() {
     return {
       id: 0,
       from_deep: 0,
       to_deep: 30,
-      soil_type: null,
-    }
+      soil_type: null
+    };
   },
 
   ugv() {
@@ -205,8 +224,8 @@ let helper = {
       id: 0,
       degree: 0,
       date: helper.GetCurrentDate()
-    }
-    return defaultItem
+    };
+    return defaultItem;
   },
 
   soildeep() {
@@ -215,19 +234,19 @@ let helper = {
       from_deep: 0,
       to_deep: 0,
       soiltype: null,
-      mustersoil: null,
-    }
-    return defaultItem
+      mustersoil: null
+    };
+    return defaultItem;
   },
 
-  farm(){
+  farm() {
     return {
       id: 0,
       name: "",
-      district: null,
-    }
+      district: null
+    };
   }
-}
+};
 
 export default ({ store, Vue }) => {
   Vue.prototype.$helper = helper,

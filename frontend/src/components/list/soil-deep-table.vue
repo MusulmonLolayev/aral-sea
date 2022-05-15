@@ -221,7 +221,6 @@ export default {
     },
 
     btnNewItem() {
-      this.muster_soil.id = 1;
       if (this.muster_soil.id == 0) {
         let message_text =
           this.$t("please_save").format_letter() +

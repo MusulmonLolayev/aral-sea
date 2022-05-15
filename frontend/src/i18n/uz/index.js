@@ -132,6 +132,7 @@ export default {
   speed_water: "suv tezligi",
   elevated: "ko'tarilgan",
   reduced: "qisqartirilgan",
+  water_salinity: "suv sho'rligi",
 
   // Modles names: Well
   my_wells: "quduqlar",
@@ -151,6 +152,13 @@ export default {
   not_higher_zero: "qiymat noldan katta bo'lishi kerak",
   add_muster: "tekshiruv qo'shish",
   select_farm: "xo'jalikni tanlash",
+  imei: "IMEI",
+  the_imei_15_digit: "IMEI 15 ta raqamdan iborat bo'lishi kerak",
+  the_last_info: "quduq holati haqidagi so'nggi ma'lumotlar",
+  date_time: "oxirgi ma'lumotlarning sanasi va vaqti",
+  well_water_degree: "quduqdagi suv darajasi",
+  well_water_salinity: "quduqdagi suvning sho'rligi",
+  well_water_temperature: "quduqdagi suv harorati",
 
   // Models names: farms:
   farms: "xo'jaliklar",

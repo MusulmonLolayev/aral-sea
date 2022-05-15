@@ -3,11 +3,13 @@ from django.contrib.auth.models import User, Group
 import datetime
 from django.utils import timezone
 
+
 class Country(models.Model):
     name = models.CharField(max_length=30)
     
     def __str__(self):
         return self.name
+
 
 class Region(models.Model):
     name = models.CharField(max_length=30)
@@ -15,13 +17,15 @@ class Region(models.Model):
     
     def __str__(self):
         return self.name
-        
+
+
 class District(models.Model):
     name = models.CharField(max_length=30)
     region = models.ForeignKey(Region, on_delete = models.CASCADE)
     
     def __str__(self):
         return self.name
+
 
 class Position(models.Model):
     title = models.CharField(max_length=50)
@@ -30,6 +34,7 @@ class Position(models.Model):
 
     def __str__(self):
         return self.title
+
 
 class Staff(models.Model):
     last_name = models.CharField(max_length=30)
@@ -44,6 +49,7 @@ class Staff(models.Model):
     def __str__(self):
         return "{} {} {}".format(self.last_name, self.first_name, self.middle_name)
 
+
 class Farm(models.Model):
     name = models.CharField(max_length=30)
     district = models.ForeignKey(District, on_delete = models.CASCADE)
@@ -51,8 +57,10 @@ class Farm(models.Model):
     def __str__(self):
         return self.name# + " ({})".format(self.district)
 
+
 class Well(models.Model):
     number = models.CharField(max_length=30)
+    imei = models.CharField(max_length=15, default='')
 
     farm = models.ForeignKey(Farm, on_delete = models.CASCADE)
     x = models.FloatField(default=0)
@@ -73,6 +81,7 @@ class Well(models.Model):
     def __str__(self):
         return str(self.farm) + ", Number {}".format(self.number)
 
+
 class MusterPumping(models.Model):
     starting_pumping = models.TimeField(default=timezone.now)
     finishing_pumping = models.TimeField(default=timezone.now)
@@ -84,6 +93,7 @@ class MusterPumping(models.Model):
     speed_water = models.FloatField(default=0)
     elevated = models.FloatField(default=0)
     reduced = models.FloatField(default=0)
+    water_salinity = models.FloatField(default=0)
     date = models.DateField(default=datetime.date.today)
 
     well = models.ForeignKey(Well, on_delete = models.CASCADE)
@@ -92,11 +102,13 @@ class MusterPumping(models.Model):
     def __str__(self):
         return "Number {}: depth={}".format(self.well.number, self.depth)
 
+
 class Ugv(models.Model):
     well = models.ForeignKey(Well, on_delete = models.CASCADE)
     staff = models.ForeignKey(Staff, on_delete = models.SET_NULL, null = True)
     degree = models.FloatField(default=0)
     date = models.DateTimeField(default=datetime.datetime.now())
+
 
 class Mgv(models.Model):
     well = models.ForeignKey(Well, on_delete = models.CASCADE)
@@ -104,15 +116,19 @@ class Mgv(models.Model):
     degree = models.FloatField(default=0)
     date = models.DateField(default=datetime.date.today)
 
+
 class SaltDegree(models.Model):
     name = models.CharField(max_length=30)
 
     def __str__(self):
         return self.name
+
+
 class CropType(models.Model):
     name = models.CharField(max_length=30)
     def __str__(self):
         return self.name
+
 
 class MusterSoil(models.Model):
     well = models.ForeignKey(Well, on_delete = models.CASCADE, null = True)
@@ -128,10 +144,12 @@ class MusterSoil(models.Model):
 
     user = models.ForeignKey(User, on_delete = models.SET_NULL, null=True)
 
+
 class SoilType(models.Model):
     name = models.CharField(max_length=30)
     def __str__(self):
         return self.name
+
 
 class SoilDeep(models.Model):
     from_deep = models.FloatField(default=0)
@@ -141,6 +159,7 @@ class SoilDeep(models.Model):
 
     def __str__(self):
         return f"{self.from_deep}-{self.to_deep} sm"
+
 
 class AnalysisSoil(models.Model):
     muster_soil = models.OneToOneField(MusterSoil, on_delete=models.SET_NULL, null=True)
@@ -153,12 +172,36 @@ class AnalysisSoil(models.Model):
 
     user = models.ForeignKey(User, on_delete = models.SET_NULL, null=True)
 
+
 class YieldSize(models.Model):
     district = models.ForeignKey(District, on_delete=models.SET_NULL, null=True)
     cropt_type = models.ForeignKey(CropType, on_delete=models.SET_NULL, null=True)
     salt_degree = models.ForeignKey(SaltDegree, on_delete=models.SET_NULL, null=True)
     size = models.FloatField(default=0)
     year = models.DateField(default=datetime.date.today)
+
+
+class WaterSize(models.Model):
+    district = models.ForeignKey(District, on_delete=models.SET_NULL, null=True)
+    size = models.FloatField(default=0)
+    cropt_type = models.ForeignKey(CropType, on_delete=models.SET_NULL, null=True)
+    year = models.DateField(default=datetime.date.today)
+
+
+class WaterNorm(models.Model):
+    district = models.ForeignKey(District, on_delete=models.SET_NULL, null=True)
+    size = models.FloatField(default=0)
+    year = models.DateField(default=datetime.date.today)
+
+
+class WellToolData(models.Model):
+    imei = models.CharField(max_length=15, default='')
+    date_time = models.DateTimeField(default=timezone.now())
+    degree = models.FloatField(default=0)
+    salinity = models.FloatField(default=0)
+    temperature = models.FloatField(default=0)
+
+
 
 class ReportFakeModel(models.Model):
 

@@ -1,8 +1,8 @@
 {
-  "name": "aralsea",
+  "name": "tuberculosissytem",
   "version": "0.0.1",
-  "description": "The monitoring system of Aral sea",
-  "productName": "The monitoring system of Aral sea",
+  "description": "Tuberculosis diagnostic system",
+  "productName": "Tuberculosis diagnostic system",
   "author": "MusulmonLolayev <musulmon.lolayev.94@gmail.com>",
   "private": true,
   "scripts": {
@@ -12,12 +12,14 @@
   "dependencies": {
     "@quasar/extras": "^1.0.0",
     "@vue/composition-api": "^1.0.0-beta.11",
-    "arcgis": "^1.0.2",
-    "arcgis-js-api": "^4.18.1",
     "axios": "^0.18.1",
     "core-js": "^3.6.5",
+    "docxtemplater": "^3.22.3",
+    "file-saver": "^2.0.5",
+    "pizzip": "^3.0.6",
     "quasar": "^1.0.0",
-    "vue-i18n": "^8.0.0"
+    "vue-i18n": "^8.0.0",
+    "vue-pdf-app": "^2.1.0"
   },
   "devDependencies": {
     "@quasar/app": "^2.0.0",
