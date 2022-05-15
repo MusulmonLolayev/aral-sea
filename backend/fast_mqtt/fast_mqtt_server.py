@@ -37,7 +37,7 @@ def on_message(client, userdata, msg):
 
 
 client = mqtt.Client()
-client.username_pw_set('emqx', '12345')
+client.username_pw_set('', '')
 client.on_connect = on_connect
 client.on_message = on_message
 
